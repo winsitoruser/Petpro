@@ -51,3 +51,60 @@ sequenceDiagram
 5. **Notifications**:
    - Notification Worker sends push notification and email to user.
    - Notification Worker notifies the clinic dashboard about the new booking.
+
+## Order / Checkout Flow
+
+```mermaid
+sequenceDiagram
+  participant Mobile
+  participant API
+  participant Product as Product Service
+  participant OrderSvc as Order Service
+  participant Payment
+  participant MQ as Message Queue
+  participant VendorWorker
+  participant Shipping
+
+  Mobile->>API: POST /orders {cart_items, address}
+  API->>Product: POST /reserve-stock {items}
+  Product-->>API: 200 reserved (stock_holds)
+  API->>OrderSvc: POST /orders/create {items, holds, totals}
+  OrderSvc-->>API: 201 order_created {order_id}
+  API->>Payment: create payment session
+  Payment-->>API: payment_url
+  API-->>Mobile: payment_url
+  Mobile->>Payment: completes payment
+  Payment->>API: webhook payment.succeeded
+  API->>OrderSvc: POST /orders/{id}/paid
+  OrderSvc->>Product: decrement stock
+  OrderSvc->>MQ: publish order.paid
+  MQ->>VendorWorker: vendor notifications + prepare shipment
+  VendorWorker->>Shipping: create shipment
+  Shipping-->>VendorWorker: tracking_no
+  VendorWorker->>OrderSvc: update order shipped
+  OrderSvc->>API: notify user
+```
+
+### Order / Checkout Flow Description
+
+1. **Initiate Order**:
+   - Mobile app submits order with cart items and shipping address.
+   - Product Service temporarily reserves inventory for the items.
+
+2. **Order Creation**:
+   - Order Service creates an order record with all details.
+   - Payment Service generates a payment session URL.
+
+3. **Payment Processing**:
+   - User completes payment through the payment gateway.
+   - Payment gateway sends webhook notification of successful payment.
+
+4. **Inventory & Fulfillment**:
+   - Order Service confirms the stock deduction.
+   - Order Service publishes a payment confirmation event.
+
+5. **Shipping & Notifications**:
+   - Vendor Worker receives the order notification.
+   - Shipping Service creates shipment and returns tracking number.
+   - Order status is updated with shipping details.
+   - User is notified about the order shipment.
