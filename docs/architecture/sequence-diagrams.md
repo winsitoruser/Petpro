@@ -108,3 +108,45 @@ sequenceDiagram
    - Shipping Service creates shipment and returns tracking number.
    - Order status is updated with shipping details.
    - User is notified about the order shipment.
+
+## Vendor Onboarding Flow
+
+```mermaid
+sequenceDiagram
+  participant VendorUI
+  participant API
+  participant ClinicSvc
+  participant AdminUI
+  participant AdminSvc
+  participant Notif
+
+  VendorUI->>API: POST /clinics {profile, docs}
+  API->>ClinicSvc: create clinic (status=pending)
+  ClinicSvc->>S3: upload docs
+  AdminUI->>AdminSvc: GET /admin/vendors/pending
+  AdminSvc->>ClinicSvc: GET pending clinics
+  AdminUI->>AdminSvc: PUT /approve/{clinic_id}
+  AdminSvc->>ClinicSvc: PATCH clinic.status = approved
+  ClinicSvc->>Notif: publish vendor.approved
+  Notif->>VendorUI: email approval
+```
+
+### Vendor Onboarding Flow Description
+
+1. **Registration Submission**:
+   - Vendor submits clinic profile and documentation through vendor UI.
+   - Clinic Service creates a new clinic record with pending status.
+   - Documents are uploaded to S3 storage.
+
+2. **Admin Review**:
+   - Admin accesses the pending vendors list through the admin dashboard.
+   - Admin Service retrieves pending clinic registrations from Clinic Service.
+
+3. **Approval Process**:
+   - Admin reviews vendor information and approves the clinic.
+   - Admin Service updates the clinic status to approved via the Clinic Service.
+
+4. **Notification**:
+   - Clinic Service publishes a vendor approval event.
+   - Notification Service sends an email confirmation to the vendor.
+   - Vendor can now access the full clinic dashboard functionality.
