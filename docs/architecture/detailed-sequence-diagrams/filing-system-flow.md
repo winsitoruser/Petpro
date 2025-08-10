@@ -116,7 +116,9 @@ sequenceDiagram
     VendorPortal->>Veterinarian: Display Update Success
 ```
 
-## 2. Document Management Flow
+## 2. Document Management Flow with Digital Signatures
+
+### 2.1 Basic Document Management
 
 ```mermaid
 sequenceDiagram
@@ -201,6 +203,75 @@ sequenceDiagram
     DocumentService->>APIGateway: Return Version Added
     APIGateway->>VendorPortal: Send Version Success
     VendorPortal->>Staff: Display Version History
+```
+
+### 2.2 Digital Signature & Verification Flow
+
+```mermaid
+sequenceDiagram
+    actor Vendor
+    participant VendorPortal as Vendor Portal
+    participant APIGateway as API Gateway
+    participant DocumentService as Document Service
+    participant SignatureService as Digital Signature Service
+    participant AuthService as Authentication Service
+    participant FilingService as Filing Service
+    participant DB as Document DB
+    participant BlockchainService as Blockchain Ledger
+    
+    %% Request Document Signing
+    Vendor->>VendorPortal: Select Document to Sign
+    VendorPortal->>APIGateway: GET /documents/{id}
+    APIGateway->>DocumentService: Retrieve Document
+    DocumentService->>DB: Query Document
+    DB->>DocumentService: Return Document Data
+    DocumentService->>APIGateway: Return Document
+    APIGateway->>VendorPortal: Send Document for Signing
+    VendorPortal->>Vendor: Display Document & Signing UI
+    
+    %% Authenticate for Signing
+    Vendor->>VendorPortal: Initiate Signing Process
+    VendorPortal->>APIGateway: POST /auth/verify-identity
+    APIGateway->>AuthService: Request MFA Verification
+    AuthService->>Vendor: Send OTP/Auth Challenge
+    Vendor->>AuthService: Submit Verification
+    AuthService->>APIGateway: Return Identity Verified
+    APIGateway->>VendorPortal: Identity Confirmed
+    
+    %% Create Digital Signature
+    Vendor->>VendorPortal: Sign Document
+    VendorPortal->>APIGateway: POST /documents/sign
+    APIGateway->>SignatureService: Create Digital Signature
+    SignatureService->>SignatureService: Generate Certificate-based Signature
+    SignatureService->>DocumentService: Apply Signature to Document
+    DocumentService->>DB: Store Signed Document
+    DB->>DocumentService: Confirm Storage
+    
+    %% Create Audit Trail
+    DocumentService->>BlockchainService: Record Signature Event
+    BlockchainService->>BlockchainService: Add to Immutable Ledger
+    BlockchainService->>DocumentService: Return Transaction Hash
+    DocumentService->>DB: Store Blockchain Reference
+    DB->>DocumentService: Confirm Reference Storage
+    
+    DocumentService->>APIGateway: Return Signature Confirmation
+    APIGateway->>VendorPortal: Send Signature Status
+    VendorPortal->>Vendor: Show "Document Signed Successfully"
+    
+    %% Signature Verification Process
+    Vendor->>VendorPortal: Request Verification Certificate
+    VendorPortal->>APIGateway: GET /documents/{id}/verify
+    APIGateway->>SignatureService: Verify Signature
+    SignatureService->>DB: Retrieve Signed Document
+    DB->>SignatureService: Return Document with Signature
+    
+    SignatureService->>BlockchainService: Verify Blockchain Record
+    BlockchainService->>SignatureService: Confirm Ledger Entry
+    
+    SignatureService->>SignatureService: Validate Certificate & Signature
+    SignatureService->>APIGateway: Return Verification Results
+    APIGateway->>VendorPortal: Send Verification Details
+    VendorPortal->>Vendor: Display Verification Certificate
 ```
 
 ## 3. Regulatory Compliance Filing Flow
@@ -293,22 +364,9 @@ sequenceDiagram
     
     NotificationService->>Staff: Send Email Notification
     
-    ComplianceService->>APIGateway: Return Review Complete
-    APIGateway->>VendorPortal: Send Review Success
-    VendorPortal->>Admin: Display Review Confirmation
-```
-
-## 4. Digital Archive and Retention Flow
-
-```mermaid
-sequenceDiagram
-    actor Staff
-    participant VendorPortal as Vendor Portal
-    participant APIGateway as API Gateway
-    participant ArchiveService as Archive Service
-    participant StorageService as Storage Service
-    participant RetentionService as Retention Service
-    participant DB as Database
+    ArchiveService->>APIGateway: Return Archiving Status
+    APIGateway->>VendorPortal: Send Archiving Status
+    VendorPortal->>Staff: Display Archiving Status
     
     %% Configure Retention Policy
     Staff->>VendorPortal: Access Archive Settings

@@ -3,17 +3,18 @@
 ## Overview
 This document provides a detailed Level 2 sequence diagram for the clinic search, service browsing, and booking process in the PetPro platform. The diagram shows the step-by-step flow between the user, mobile app, backend services, and clinic/vendor systems.
 
-## 1. Clinic Search & Browse Flow
+## 1. Clinic Search & Browsing Flow (Web & Mobile)
 
 ```mermaid
 sequenceDiagram
     actor User
-    participant MobileApp as Mobile App
+    participant MobileApp as Mobile App/Web
     participant APIGateway as API Gateway
     participant SearchService as Search Service
-    participant ClinicService as Clinic Service
     participant LocationService as Location Service
-    participant RatingService as Rating Service
+    participant ClinicService as Clinic Service
+    participant ReviewService as Review Service
+    participant CacheService as Cache Service
     participant DB as Database
     participant Cache as Redis Cache
 
@@ -34,20 +35,21 @@ sequenceDiagram
     SearchService->>LocationService: Geocode Location
     LocationService->>SearchService: Return Coordinates
     
-    SearchService->>Cache: Check for Cached Results
+    SearchService->>CacheService: Check for Cached Results
     
     alt Cache Hit
-        Cache->>SearchService: Return Cached Results
+        CacheService->>SearchService: Return Cached Results
     else Cache Miss
         SearchService->>DB: Query Nearby Clinics
         DB->>SearchService: Return Raw Clinic Data
-        SearchService->>Cache: Store Results (TTL: 1 hour)
+        SearchService->>CacheService: Cache Search Results (5 min)
+        CacheService->>SearchService: Confirm Cache Storage
     end
     
-    SearchService->>RatingService: Get Ratings for Clinics
-    RatingService->>DB: Query Ratings Data
-    DB->>RatingService: Return Ratings
-    RatingService->>SearchService: Return Aggregated Ratings
+    SearchService->>ReviewService: Get Reviews for Clinics
+    ReviewService->>DB: Query Reviews Data
+    DB->>ReviewService: Return Reviews
+    ReviewService->>SearchService: Return Aggregated Reviews
     
     SearchService->>APIGateway: Return Search Results
     APIGateway->>MobileApp: Send Clinics List Response
@@ -59,10 +61,12 @@ sequenceDiagram
     MobileApp->>APIGateway: POST /search/clinics (with filters)
     APIGateway->>SearchService: Forward Filtered Search
     SearchService->>DB: Query with Filters
-    DB->>SearchService: Return Filtered Results
-    SearchService->>APIGateway: Return Filtered Results
-    APIGateway->>MobileApp: Send Filtered Clinics
-    MobileApp->>User: Display Filtered Results
+    DB->>SearchService: Return Search Results
+    SearchService->>CacheService: Cache Search Results (5 min)
+    CacheService->>SearchService: Confirm Cache Storage
+    SearchService->>APIGateway: Return Clinics List
+    APIGateway->>MobileApp: Send Clinics Data
+    MobileApp->>User: Display Clinic Search Results
     
     %% Clinic Detail View
     User->>MobileApp: Select Clinic
@@ -290,6 +294,61 @@ sequenceDiagram
         APIGateway->>MobileApp: Send Check-in Confirmation
         MobileApp->>User: Show Check-in Confirmation
     end
+```
+
+## 4. Mobile-Specific Flow
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant MobileApp as Mobile App
+    participant APIGateway as API Gateway
+    participant NotificationService as Notification Service
+    participant BookingService as Booking Service
+    participant ReminderService as Reminder Service
+    participant PushService as Push Notification Service
+    participant EmailService as Email Service
+    participant SMSService as SMS Service
+    participant DB as Database
+    participant VendorApp as Vendor Dashboard
+    actor Vendor
+
+    %% View Bookings
+    User->>MobileApp: Open "My Bookings"
+    MobileApp->>APIGateway: GET /bookings?status=all
+    APIGateway->>BookingService: Get User Bookings
+    BookingService->>DB: Query Bookings
+    DB->>BookingService: Return Bookings Data
+    BookingService->>APIGateway: Return Bookings List
+    APIGateway->>MobileApp: Send Bookings Data
+    MobileApp->>User: Display Bookings List
+    
+    %% View Booking Details
+    User->>MobileApp: Select Booking
+    MobileApp->>APIGateway: GET /bookings/{id}
+    APIGateway->>BookingService: Get Booking Details
+    BookingService->>DB: Query Booking Data
+    DB->>BookingService: Return Booking Details
+    BookingService->>APIGateway: Return Booking Data
+    APIGateway->>MobileApp: Send Booking Details
+    MobileApp->>User: Display Booking Details
+    
+    %% Push Notification
+    NotificationService->>PushService: Send Push Notification
+    PushService->>MobileApp: Deliver Push Notification
+    MobileApp->>User: Show Appointment Reminder
+    MobileApp->>PushService: Confirm Delivery
+    PushService->>NotificationService: Update Delivery Status
+    
+    %% Email Notification
+    NotificationService->>EmailService: Send Email Reminder
+    EmailService->>User: Deliver Email Notification
+    EmailService->>NotificationService: Report Delivery Status
+    
+    %% SMS Notification (if enabled)
+    NotificationService->>SMSService: Send SMS Reminder
+    SMSService->>User: Deliver SMS Message
+    SMSService->>NotificationService: Report Delivery Status
 ```
 
 ## Error Handling Details

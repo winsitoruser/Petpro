@@ -147,7 +147,9 @@ sequenceDiagram
     MobileApp->>User: Display Updated Cart
 ```
 
-## 2. Order Checkout Flow
+## 2. Shopping Cart & Checkout Flow
+
+### 2.1 Cart Management
 
 ```mermaid
 sequenceDiagram
@@ -291,7 +293,88 @@ sequenceDiagram
     end
 ```
 
-## 3. Order Tracking & Management Flow
+### 2.2 Payment Gateway Integration
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant MobileApp as Mobile App
+    participant APIGateway as API Gateway
+    participant PaymentService as Payment Service
+    participant PaymentGateway as Payment Gateway
+    participant OrderService as Order Service
+    participant DB as Database
+    
+    %% Payment Processing Details
+    User->>MobileApp: Select Payment Method
+    MobileApp->>MobileApp: Validate Payment Form
+    MobileApp->>APIGateway: POST /payments/initialize
+    APIGateway->>PaymentService: Initialize Payment
+    
+    PaymentService->>PaymentGateway: Create Payment Intent
+    PaymentGateway->>PaymentService: Return Intent Token
+    
+    PaymentService->>APIGateway: Return Payment Session
+    APIGateway->>MobileApp: Send Payment Session
+    MobileApp->>User: Display Secure Payment Form
+    
+    %% Credit Card Payment
+    alt Credit Card Payment
+        User->>MobileApp: Enter Card Details
+        MobileApp->>PaymentGateway: Submit Card Details (PCI-compliant)
+        PaymentGateway->>PaymentGateway: Process Card Verification
+        
+        alt 3D Secure Required
+            PaymentGateway->>MobileApp: Redirect to 3D Secure
+            MobileApp->>User: Display 3D Secure Challenge
+            User->>MobileApp: Complete 3D Secure
+            MobileApp->>PaymentGateway: Submit 3D Secure Result
+        end
+        
+        PaymentGateway->>MobileApp: Return Payment Authorization
+        MobileApp->>APIGateway: POST /payments/confirm
+        APIGateway->>PaymentService: Confirm Payment
+        PaymentService->>PaymentGateway: Capture Authorized Payment
+        PaymentGateway->>PaymentService: Return Payment Result
+    end
+    
+    %% Digital Wallet Payment
+    alt Digital Wallet (Apple Pay/Google Pay)
+        User->>MobileApp: Select Digital Wallet
+        MobileApp->>MobileApp: Open Wallet Interface
+        User->>MobileApp: Confirm with Biometrics
+        MobileApp->>PaymentGateway: Submit Wallet Token
+        PaymentGateway->>PaymentService: Verify and Process Token
+        PaymentService->>APIGateway: Return Payment Result
+        APIGateway->>MobileApp: Send Payment Success
+    end
+    
+    %% Save Payment Method
+    alt Save Payment Method
+        MobileApp->>User: Ask to Save Payment Method
+        User->>MobileApp: Confirm Save Payment
+        MobileApp->>APIGateway: POST /user/payment-methods
+        APIGateway->>PaymentService: Store Payment Token
+        PaymentService->>PaymentGateway: Create Customer Token
+        PaymentGateway->>PaymentService: Return Customer Profile
+        PaymentService->>DB: Store Tokenized Payment
+        DB->>PaymentService: Confirm Storage
+        PaymentService->>APIGateway: Return Save Success
+        APIGateway->>MobileApp: Send Save Confirmation
+        MobileApp->>User: Show "Payment Method Saved"
+    end
+    
+    %% Finalize Order with Payment
+    MobileApp->>APIGateway: POST /orders with paymentId
+    APIGateway->>OrderService: Create Order with Payment
+    OrderService->>DB: Store Order with Payment Reference
+    DB->>OrderService: Confirm Storage
+    OrderService->>APIGateway: Return Order Created
+    APIGateway->>MobileApp: Send Order Confirmation
+    MobileApp->>User: Show Order Success
+```
+
+## 3. Order Processing Flow & Management Flow
 
 ```mermaid
 sequenceDiagram
@@ -403,7 +486,67 @@ sequenceDiagram
     end
 ```
 
-## 4. QR/Barcode Scanning Flow
+### 3.1 Real-time Inventory Management
+
+```mermaid
+sequenceDiagram
+    actor Vendor
+    participant VendorPortal as Vendor Portal
+    participant APIGateway as API Gateway
+    participant OrderService as Order Service
+    participant InventoryService as Inventory Service
+    participant NotificationService as Notification Service
+    participant DB as Database
+    participant MobileApp as Mobile App
+    actor User
+    
+    %% Inventory Check During Order Creation
+    OrderService->>InventoryService: Check Inventory Availability
+    InventoryService->>DB: Query Current Inventory
+    DB->>InventoryService: Return Inventory Status
+    
+    alt Sufficient Inventory
+        InventoryService->>InventoryService: Reserve Inventory
+        InventoryService->>DB: Update Reserved Quantity
+        DB->>InventoryService: Confirm Update
+        InventoryService->>OrderService: Return Availability Confirmed
+    else Insufficient Inventory
+        InventoryService->>OrderService: Return Inventory Shortage
+        OrderService->>NotificationService: Alert Inventory Shortage
+        NotificationService->>VendorPortal: Send Low Stock Alert
+        VendorPortal->>Vendor: Display Stock Alert
+        OrderService->>APIGateway: Return Partial Fulfillment Status
+        APIGateway->>MobileApp: Send Availability Update
+        MobileApp->>User: Show "Some Items Limited Quantity"
+    end
+    
+    %% Order Confirmation Reduces Inventory
+    OrderService->>InventoryService: Confirm Inventory Deduction
+    InventoryService->>DB: Update Actual Inventory
+    DB->>InventoryService: Confirm Update
+    
+    %% Automated Reordering
+    InventoryService->>InventoryService: Check Reorder Thresholds
+    
+    alt Threshold Reached
+        InventoryService->>NotificationService: Generate Reorder Alert
+        NotificationService->>VendorPortal: Send Reorder Notification
+        VendorPortal->>Vendor: Display Reorder Alert
+    end
+    
+    %% Real-time Inventory Sync
+    Vendor->>VendorPortal: Update Inventory Quantity
+    VendorPortal->>APIGateway: PUT /inventory/update
+    APIGateway->>InventoryService: Process Inventory Update
+    InventoryService->>DB: Update Inventory Records
+    DB->>InventoryService: Confirm Update
+    
+    InventoryService->>NotificationService: Send Inventory Status Change
+    NotificationService->>MobileApp: Update Product Availability
+    MobileApp->>User: Show Updated Availability
+```
+
+## 4. QR Code & Barcode Scanning Flow
 
 ```mermaid
 sequenceDiagram
