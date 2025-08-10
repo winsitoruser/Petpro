@@ -1,8 +1,14 @@
 # Detailed Entity Relationship Diagram: Booking Domain
+# 詳細エンティティ関連図：予約ドメイン
 
-Dokumen ini berisi ERD (Entity Relationship Diagram) detail untuk domain Booking pada platform PetPro, dengan fokus pada struktur data level 2 dan 3.
+**English**
+This document contains detailed Entity Relationship Diagrams (ERD) for the Booking domain on the PetPro platform, focusing on level 2 and 3 data structures.
+
+**日本語**
+この文書は、PetProプラットフォームの予約ドメインに関する詳細なエンティティ関連図（ERD）を含み、レベル2および3のデータ構造に焦点を当てています。
 
 ## Level 1: Overview Booking Domain ERD
+## レベル1：予約ドメインERD概要
 
 ```mermaid
 erDiagram
@@ -19,6 +25,7 @@ erDiagram
 ```
 
 ## Level 2: Detailed Booking Domain ERD
+## レベル2：詳細予約ドメインERD
 
 ```mermaid
 erDiagram
@@ -235,9 +242,11 @@ erDiagram
     BOOKINGS ||--o{ NOTIFICATIONS : triggers
 ```
 
-## Level 3: Database Schema Detail untuk Booking Domain
+## Level 3: Database Schema Detail for Booking Domain
+## レベル3：予約ドメインのデータベーススキーマ詳細
 
 ### `users` Table
+### `users` テーブル
 
 ```sql
 CREATE TABLE users (
@@ -261,6 +270,7 @@ CREATE INDEX idx_users_phone ON users(phone_number);
 ```
 
 ### `pets` Table
+### `pets` テーブル
 
 ```sql
 CREATE TABLE pets (
@@ -287,6 +297,7 @@ CREATE INDEX idx_pets_breed ON pets(breed);
 ```
 
 ### `clinics` Table
+### `clinics` テーブル
 
 ```sql
 CREATE TABLE clinics (
@@ -328,6 +339,7 @@ CREATE INDEX idx_clinics_geolocation ON clinics USING gist (point(longitude, lat
 ```
 
 ### `services` Table
+### `services` テーブル
 
 ```sql
 CREATE TABLE services (
@@ -353,6 +365,7 @@ CREATE INDEX idx_services_availability ON services(is_available);
 ```
 
 ### `staff` Table
+### `staff` テーブル
 
 ```sql
 CREATE TABLE staff (
@@ -378,6 +391,7 @@ CREATE INDEX idx_staff_email ON staff(email);
 ```
 
 ### `slots` Table
+### `slots` テーブル
 
 ```sql
 CREATE TABLE slots (
@@ -406,6 +420,7 @@ CREATE INDEX idx_slots_status ON slots(status);
 ```
 
 ### `reservations` Table
+### `reservations` テーブル
 
 ```sql
 CREATE TABLE reservations (
@@ -434,6 +449,7 @@ CREATE INDEX idx_reservations_expiry ON reservations(expires_at);
 ```
 
 ### `bookings` Table
+### `bookings` テーブル
 
 ```sql
 CREATE TABLE bookings (
@@ -471,6 +487,7 @@ CREATE INDEX idx_bookings_created ON bookings(created_at);
 ```
 
 ### `payments` Table
+### `payments` テーブル
 
 ```sql
 CREATE TABLE payments (
@@ -495,6 +512,7 @@ CREATE INDEX idx_payments_external_ref ON payments(external_reference);
 ```
 
 ### `financial_entries` Table
+### `financial_entries` テーブル
 
 ```sql
 CREATE TABLE financial_entries (
@@ -524,6 +542,7 @@ CREATE INDEX idx_financial_settlement ON financial_entries(settlement_date);
 ```
 
 ### `reviews` Table
+### `reviews` テーブル
 
 ```sql
 CREATE TABLE reviews (
@@ -555,6 +574,7 @@ CREATE INDEX idx_reviews_published ON reviews(is_published);
 ```
 
 ### `notifications` Table
+### `notifications` テーブル
 
 ```sql
 CREATE TABLE notifications (
@@ -580,28 +600,42 @@ CREATE INDEX idx_notifications_created ON notifications(created_at);
 ```
 
 ## Transactional Database Considerations
+## トランザクションデータベースの考慮事項
 
 ### Data Consistency
+### データ整合性
 
-1. **Reservasi ke Booking**:
-   * Penggunaan transaksi untuk mengkonversi reservasi menjadi booking
-   * Pemeriksaan status reservasi sebelum konfirmasi
+**English**
+1. **Reservation to Booking**:
+   * Using transactions to convert reservations to bookings
+   * Verifying reservation status before confirmation
 
-2. **Pembatalan dan Pengembalian Dana**:
-   * Transaksi terdistribusi antara booking, payment, dan financial_entries
-   * Compensating transaction pattern untuk rollback jika terjadi kegagalan
+2. **Cancellation and Refunds**:
+   * Distributed transactions between booking, payment, and financial_entries
+   * Compensating transaction pattern for rollback in case of failure
+   
+**日本語**
+1. **予約から予約確定へ**:
+   * 予約を予約確定に変換するためのトランザクションの使用
+   * 確認前の予約ステータスの確認
 
-### Partisi dan Sharding
+2. **キャンセルと返金**:
+   * 予約、決済、及び財務エントリ間の分散トランザクション
+   * 失敗時のロールバックのための補正トランザクションパターン
 
-1. **Partisi berdasarkan Waktu**:
-   * Partisi table bookings, slots, dan reservations berdasarkan tanggal
-   * Mengoptimalkan query untuk periode waktu tertentu
+### Partitioning and Sharding
+### パーティショニングとシャーディング
+
+**English**
+1. **Time-based Partitioning**:
+   * Partition bookings, slots, and reservations tables based on date
+   * Optimize queries for specific time periods
 
 ```sql
--- Contoh partisi untuk table bookings
+-- Example partition for bookings table
 CREATE TABLE bookings (
     id UUID NOT NULL,
-    /* kolom lainnya */
+    /* other columns */
     created_at TIMESTAMP WITH TIME ZONE NOT NULL
 ) PARTITION BY RANGE (created_at);
 
@@ -612,21 +646,56 @@ CREATE TABLE bookings_2025_q2 PARTITION OF bookings
     FOR VALUES FROM ('2025-04-01') TO ('2025-07-01');
 ```
 
-### Indeks dan Query Optimization
-
-1. **Composite Indexes**:
-   * Membuat indeks gabungan untuk query yang sering dijalankan:
+**日本語**
+1. **時間ベースのパーティショニング**:
+   * 日付に基づいてbookings、slots、reservationsテーブルをパーティション化
+   * 特定の期間のクエリを最適化
 
 ```sql
--- Untuk pencarian booking berdasarkan user dan status
+-- bookingsテーブルのパーティション例
+CREATE TABLE bookings (
+    id UUID NOT NULL,
+    /* 他のカラム */
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL
+) PARTITION BY RANGE (created_at);
+
+CREATE TABLE bookings_2025_q1 PARTITION OF bookings
+    FOR VALUES FROM ('2025-01-01') TO ('2025-04-01');
+    
+CREATE TABLE bookings_2025_q2 PARTITION OF bookings
+    FOR VALUES FROM ('2025-04-01') TO ('2025-07-01');
+```
+
+### Indexes and Query Optimization
+### インデックスとクエリ最適化
+
+**English**
+1. **Composite Indexes**:
+   * Create combined indexes for frequently executed queries:
+
+```sql
+-- For searching bookings by user and status
 CREATE INDEX idx_bookings_user_status ON bookings(user_id, status);
 
--- Untuk pencarian slot berdasarkan service dan rentang tanggal
+-- For searching slots by service and date range
 CREATE INDEX idx_slots_service_date ON slots(service_id, slot_date);
 ```
 
+**日本語**
+1. **複合インデックス**:
+   * 頻繁に実行されるクエリ用の複合インデックスを作成します：
+
+```sql
+-- ユーザーとステータスで予約を検索するため
+CREATE INDEX idx_bookings_user_status ON bookings(user_id, status);
+
+-- サービスと日付範囲でスロットを検索するため
+CREATE INDEX idx_slots_service_date ON slots(service_id, slot_date);
+```
+
+**English**
 2. **Materialized Views**:
-   * Untuk query aggregasi dan reporting:
+   * For aggregation queries and reporting:
 
 ```sql
 CREATE MATERIALIZED VIEW clinic_booking_summary AS
@@ -639,7 +708,32 @@ SELECT
 FROM bookings
 GROUP BY clinic_id, DATE_TRUNC('month', created_at);
 
--- Refresh setiap hari
+-- Refresh daily
+CREATE OR REPLACE FUNCTION refresh_materialized_views()
+RETURNS VOID AS $$
+BEGIN
+    REFRESH MATERIALIZED VIEW CONCURRENTLY clinic_booking_summary;
+    RETURN;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+**日本語**
+2. **マテリアライズドビュー**:
+   * 集計クエリとレポーティングのためです：
+
+```sql
+CREATE MATERIALIZED VIEW clinic_booking_summary AS
+SELECT 
+    clinic_id,
+    DATE_TRUNC('month', created_at) AS month,
+    COUNT(*) AS total_bookings,
+    SUM(amount) AS total_revenue,
+    COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled_count
+FROM bookings
+GROUP BY clinic_id, DATE_TRUNC('month', created_at);
+
+-- 毎日更新
 CREATE OR REPLACE FUNCTION refresh_materialized_views()
 RETURNS VOID AS $$
 BEGIN
@@ -650,9 +744,12 @@ $$ LANGUAGE plpgsql;
 ```
 
 ## Domain Event Model
+## ドメインイベントモデル
 
 ### Booking Domain Events
+### 予約ドメインイベント
 
+**English**
 1. **ReservationCreated**
 ```json
 {
@@ -666,6 +763,21 @@ $$ LANGUAGE plpgsql;
 }
 ```
 
+**日本語**
+1. **予約作成完了**
+```json
+{
+  "event_type": "reservation.created",
+  "reservation_id": "uuid",
+  "user_id": "uuid",
+  "pet_id": "uuid",
+  "service_id": "uuid",
+  "slot_id": "uuid",
+  "expires_at": "timestamp"
+}
+```
+
+**English**
 2. **ReservationExpired**
 ```json
 {
@@ -677,6 +789,19 @@ $$ LANGUAGE plpgsql;
 }
 ```
 
+**日本語**
+2. **予約期限切れ**
+```json
+{
+  "event_type": "reservation.expired",
+  "reservation_id": "uuid",
+  "user_id": "uuid",
+  "service_id": "uuid",
+  "slot_id": "uuid"
+}
+```
+
+**English**
 3. **BookingConfirmed**
 ```json
 {
@@ -693,6 +818,24 @@ $$ LANGUAGE plpgsql;
 }
 ```
 
+**日本語**
+3. **予約確定**
+```json
+{
+  "event_type": "booking.confirmed",
+  "booking_id": "uuid",
+  "reference_code": "string",
+  "user_id": "uuid",
+  "pet_id": "uuid",
+  "clinic_id": "uuid",
+  "service_id": "uuid",
+  "slot_date": "date",
+  "slot_time": "time",
+  "amount": "decimal"
+}
+```
+
+**English**
 4. **BookingCancelled**
 ```json
 {
@@ -706,7 +849,35 @@ $$ LANGUAGE plpgsql;
 }
 ```
 
+**日本語**
+4. **予約キャンセル**
+```json
+{
+  "event_type": "booking.cancelled",
+  "booking_id": "uuid",
+  "user_id": "uuid",
+  "clinic_id": "uuid",
+  "cancellation_reason": "string",
+  "refund_amount": "decimal",
+  "refund_status": "string"
+}
+```
+
+**English**
 5. **BookingCompleted**
+```json
+{
+  "event_type": "booking.completed",
+  "booking_id": "uuid",
+  "user_id": "uuid",
+  "clinic_id": "uuid",
+  "service_id": "uuid",
+  "completed_at": "timestamp"
+}
+```
+
+**日本語**
+5. **予約完了**
 ```json
 {
   "event_type": "booking.completed",
