@@ -46,169 +46,169 @@ This document outlines the development timeline for the PetPro platform, broken 
 
 ### Phase 1: Core Foundation & Authentication
 #### Backend Setup (Week 1)
-- [ ] Set up project structure and repositories
-- [ ] Configure development environment
-- [ ] Set up CI/CD pipeline
-- [ ] Create basic Docker configuration
-- [ ] Implement logging system
+- [ ] Set up project structure and repositories (3 points)
+- [ ] Configure development environment (2 points)
+- [ ] Set up CI/CD pipeline (5 points)
+- [ ] Create basic Docker configuration (5 points)
+- [ ] Implement logging system (3 points)
 
 #### Database Implementation (Week 1)
-- [ ] Set up PostgreSQL database
-- [ ] Implement core database schema
-- [ ] Create initial migrations
-- [ ] Implement data access layer
-- [ ] Set up Redis for caching
+- [ ] Set up PostgreSQL database (3 points)
+- [ ] Implement core database schema (5 points)
+- [ ] Create initial migrations (3 points)
+- [ ] Implement data access layer (5 points)
+- [ ] Set up Redis for caching (3 points)
 
 #### Authentication System (Week 2)
-- [ ] Implement user registration (email, phone)
-- [ ] Develop OTP verification system
-- [ ] Integrate social login (Google/Apple)
-- [ ] Create JWT authentication system
-- [ ] Implement role-based access control
+- [ ] Implement user registration (email, phone) (5 points)
+- [ ] Develop OTP verification system (8 points)
+- [ ] Integrate social login (Google/Apple) (8 points)
+- [ ] Create JWT authentication system (5 points)
+- [ ] Implement role-based access control (5 points)
 
 #### API Infrastructure (Week 2)
-- [ ] Implement API gateway
-- [ ] Set up API documentation (Swagger)
-- [ ] Create basic health check endpoints
-- [ ] Implement rate limiting
-- [ ] Set up error handling middleware
+- [ ] Implement API gateway (8 points)
+- [ ] Set up API documentation (Swagger) (3 points)
+- [ ] Create basic health check endpoints (1 point)
+- [ ] Implement rate limiting (5 points)
+- [ ] Set up error handling middleware (3 points)
 
 ### Phase 2: User & Vendor Core Features
 #### Mobile App Core (Week 3)
-- [ ] Create app navigation structure
-- [ ] Design and implement user profile screens
-- [ ] Build pet profile management
-- [ ] Implement account settings
-- [ ] Design clinic/service browse screens
+- [ ] Create app navigation structure (5 points)
+- [ ] Design and implement user profile screens (5 points)
+- [ ] Build pet profile management (8 points)
+- [ ] Implement account settings (3 points)
+- [ ] Design clinic/service browse screens (5 points)
 
 #### Pet Management System (Week 3)
-- [ ] Implement pet profile CRUD operations
-- [ ] Develop pet vaccination record management
-- [ ] Create pet health history tracking
-- [ ] Build pet photo upload functionality
+- [ ] Implement pet profile CRUD operations (5 points)
+- [ ] Develop pet vaccination record management (5 points)
+- [ ] Create pet health history tracking (8 points)
+- [ ] Build pet photo upload functionality (3 points)
 
 #### Vendor Dashboard Basics (Week 4)
-- [ ] Create vendor registration & approval flow
-- [ ] Design dashboard layout and navigation
-- [ ] Implement clinic profile management
-- [ ] Build document upload and verification
-- [ ] Create business hours management
+- [ ] Create vendor registration & approval flow (8 points)
+- [ ] Design dashboard layout and navigation (5 points)
+- [ ] Implement clinic profile management (5 points)
+- [ ] Build document upload and verification (8 points)
+- [ ] Create business hours management (5 points)
 
 #### Admin Panel Foundation (Week 5)
-- [ ] Design admin dashboard
-- [ ] Implement vendor approval system
-- [ ] Create user management interface
-- [ ] Build basic reporting screens
-- [ ] Implement system configuration settings
+- [ ] Design admin dashboard (5 points)
+- [ ] Implement vendor approval system (8 points)
+- [ ] Create user management interface (5 points)
+- [ ] Build basic reporting screens (8 points)
+- [ ] Implement system configuration settings (5 points)
 
 #### Search & Filter System (Week 5)
-- [ ] Implement clinic search functionality
-- [ ] Create location-based filtering
-- [ ] Build service category filtering
-- [ ] Develop rating-based sorting
-- [ ] Implement search result pagination
+- [ ] Implement clinic search functionality (8 points)
+- [ ] Create location-based filtering (8 points)
+- [ ] Build service category filtering (5 points)
+- [ ] Develop rating-based sorting (3 points)
+- [ ] Implement search result pagination (3 points)
 
 ### Phase 3: Booking & Services
 #### Service Management (Week 6)
-- [ ] Build service CRUD operations for vendors
-- [ ] Implement service pricing system
-- [ ] Create service duration configuration
-- [ ] Develop service availability settings
-- [ ] Build service category management
+- [ ] Build service CRUD operations for vendors (5 points)
+- [ ] Implement service pricing system (5 points)
+- [ ] Create service duration configuration (3 points)
+- [ ] Develop service availability settings (8 points)
+- [ ] Build service category management (5 points)
 
 #### Booking System (Week 6-7)
-- [ ] Implement slot availability calendar
-- [ ] Create booking reservation mechanism with locking
-- [ ] Build booking confirmation process
-- [ ] Develop booking cancellation/refund logic
-- [ ] Implement rebooking functionality
+- [ ] Implement slot availability calendar (8 points)
+- [ ] Create booking reservation mechanism with locking (13 points)
+- [ ] Build booking confirmation process (8 points)
+- [ ] Develop booking cancellation/refund logic (8 points)
+- [ ] Implement rebooking functionality (8 points)
 
 #### Payment Integration (Week 7)
-- [ ] Integrate payment gateway (Midtrans/Xendit)
-- [ ] Implement payment processing logic
-- [ ] Create payment webhook handlers
-- [ ] Build receipt generation
-- [ ] Develop payment history tracking
+- [ ] Integrate payment gateway (Midtrans/Xendit) (13 points)
+- [ ] Implement payment processing logic (8 points)
+- [ ] Create payment webhook handlers (8 points)
+- [ ] Build receipt generation (5 points)
+- [ ] Develop payment history tracking (5 points)
 
 #### Notification System (Week 8)
-- [ ] Implement push notification service
-- [ ] Create email notification templates
-- [ ] Build SMS notification system
-- [ ] Develop booking reminder functionality
-- [ ] Implement notification preferences
+- [ ] Implement push notification service (8 points)
+- [ ] Create email notification templates (5 points)
+- [ ] Build SMS notification system (8 points)
+- [ ] Develop booking reminder functionality (5 points)
+- [ ] Implement notification preferences (3 points)
 
 ### Phase 4: E-commerce Features
 #### Product Catalog (Week 9)
-- [ ] Build product CRUD operations for vendors
-- [ ] Implement product categorization
-- [ ] Create product image upload and gallery
-- [ ] Develop product search and filtering
-- [ ] Build product detail views
+- [ ] Build product CRUD operations for vendors (5 points)
+- [ ] Implement product categorization (5 points)
+- [ ] Create product image upload and gallery (5 points)
+- [ ] Develop product search and filtering (8 points)
+- [ ] Build product detail views (3 points)
 
 #### Shopping Cart (Week 10)
-- [ ] Implement shopping cart functionality
-- [ ] Create multi-vendor cart handling
-- [ ] Build cart persistence
-- [ ] Develop quantity management
-- [ ] Implement cart summary calculations
+- [ ] Implement shopping cart functionality (8 points)
+- [ ] Create multi-vendor cart handling (13 points)
+- [ ] Build cart persistence (5 points)
+- [ ] Develop quantity management (3 points)
+- [ ] Implement cart summary calculations (5 points)
 
 #### Order Management (Week 10-11)
-- [ ] Create order placement flow
-- [ ] Implement order status tracking
-- [ ] Build order history for users
-- [ ] Develop order management for vendors
-- [ ] Implement order notifications
+- [ ] Create order placement flow (8 points)
+- [ ] Implement order status tracking (5 points)
+- [ ] Build order history for users (3 points)
+- [ ] Develop order management for vendors (8 points)
+- [ ] Implement order notifications (5 points)
 
 #### Shipping Integration (Week 11)
-- [ ] Integrate shipping providers (JNE/SiCepat/Grab)
-- [ ] Implement shipping cost calculation
-- [ ] Build shipping address management
-- [ ] Create shipping tracking integration
-- [ ] Develop shipping method selection
+- [ ] Integrate shipping providers (JNE/SiCepat/Grab) (13 points)
+- [ ] Implement shipping cost calculation (8 points)
+- [ ] Build shipping address management (5 points)
+- [ ] Create shipping tracking integration (8 points)
+- [ ] Develop shipping method selection (5 points)
 
 ### Phase 5: Review & Rating System
 #### User Reviews (Week 12)
-- [ ] Implement review creation after service/purchase
-- [ ] Build review display on clinic/product pages
-- [ ] Create review management for users
-- [ ] Develop review response system for vendors
-- [ ] Implement review analytics
+- [ ] Implement review creation after service/purchase (5 points)
+- [ ] Build review display on clinic/product pages (3 points)
+- [ ] Create review management for users (3 points)
+- [ ] Develop review response system for vendors (5 points)
+- [ ] Implement review analytics (8 points)
 
 #### Rating System (Week 13)
-- [ ] Create star rating functionality
-- [ ] Implement rating aggregation
-- [ ] Build rating filters
-- [ ] Develop featured reviews selection
-- [ ] Create rating trends reporting
+- [ ] Create star rating functionality (3 points)
+- [ ] Implement rating aggregation (5 points)
+- [ ] Build rating filters (3 points)
+- [ ] Develop featured reviews selection (3 points)
+- [ ] Create rating trends reporting (5 points)
 
 ### Phase 6: Polish & Final Touches
 #### UI/UX Improvements (Week 14)
-- [ ] Conduct usability testing
-- [ ] Implement UI polish based on feedback
-- [ ] Optimize mobile responsive design
-- [ ] Create animations and transitions
-- [ ] Improve accessibility features
+- [ ] Conduct usability testing (5 points)
+- [ ] Implement UI polish based on feedback (8 points)
+- [ ] Optimize mobile responsive design (5 points)
+- [ ] Create animations and transitions (5 points)
+- [ ] Improve accessibility features (8 points)
 
 #### Performance Optimization (Week 14)
-- [ ] Conduct performance testing
-- [ ] Optimize database queries
-- [ ] Implement additional caching
-- [ ] Reduce API response times
-- [ ] Optimize image loading and processing
+- [ ] Conduct performance testing (5 points)
+- [ ] Optimize database queries (8 points)
+- [ ] Implement additional caching (5 points)
+- [ ] Reduce API response times (8 points)
+- [ ] Optimize image loading and processing (5 points)
 
 #### Testing & Bug Fixes (Week 15)
-- [ ] Conduct comprehensive testing
-- [ ] Fix identified bugs and issues
-- [ ] Perform security testing
-- [ ] Test edge cases and failure scenarios
-- [ ] Validate all user flows
+- [ ] Conduct comprehensive testing (8 points)
+- [ ] Fix identified bugs and issues (13 points)
+- [ ] Perform security testing (8 points)
+- [ ] Test edge cases and failure scenarios (5 points)
+- [ ] Validate all user flows (5 points)
 
 #### Deployment Preparation (Week 15)
-- [ ] Prepare production environment
-- [ ] Create deployment documentation
-- [ ] Set up monitoring and alerting
-- [ ] Prepare database backup strategies
-- [ ] Configure auto-scaling and load balancing
+- [ ] Prepare production environment (5 points)
+- [ ] Create deployment documentation (3 points)
+- [ ] Set up monitoring and alerting (5 points)
+- [ ] Prepare database backup strategies (3 points)
+- [ ] Configure auto-scaling and load balancing (8 points)
 
 ## Features by User Type
 
