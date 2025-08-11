@@ -1,0 +1,9 @@
+root: ./
+
+structure:
+  readme: README.md
+  summary: SUMMARY.md
+
+redirects:
+  docs/overview: README.md
+  ui-ux/vendor-dashboard: docs/ui-ux-guidelines/vendor-dashboard-overview.md
