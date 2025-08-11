@@ -140,6 +140,27 @@ This document provides technical specifications, interaction details, and API in
 />
 ```
 
+## API Mapping Documentation
+
+For comprehensive documentation on all API endpoints that correspond to vendor dashboard wireframes, please refer to the following API mapping documents:
+
+| Feature Area | API Mapping Document |
+|-------------|---------------------|
+| Dashboard Overview & Authentication | [Vendor Wireframes API Mapping - Overview](/docs/ui-ux-guidelines/vendor-wireframes-api-mapping-overview.md) |
+| Order Management | [Vendor Wireframes API Mapping - Orders](/docs/ui-ux-guidelines/vendor-wireframes-api-mapping-orders.md) |
+| Appointment Management | [Vendor Wireframes API Mapping - Appointments](/docs/ui-ux-guidelines/vendor-wireframes-api-mapping-appointments.md) |
+| Inventory Management | [Vendor Wireframes API Mapping - Inventory](/docs/ui-ux-guidelines/vendor-wireframes-api-mapping-inventory.md) |
+| Reviews Management | [Vendor Wireframes API Mapping - Reviews](/docs/ui-ux-guidelines/vendor-wireframes-api-mapping-reviews.md) |
+| Promotions Management | [Vendor Wireframes API Mapping - Promotions](/docs/ui-ux-guidelines/vendor-wireframes-api-mapping-promotions.md) |
+| Analytics Dashboard | [Vendor Wireframes API Mapping - Analytics](/docs/ui-ux-guidelines/vendor-wireframes-api-mapping-analytics.md) |
+| Settings Management | [Vendor Wireframes API Mapping - Settings](/docs/ui-ux-guidelines/vendor-wireframes-api-mapping-settings.md) |
+
+These documents provide detailed information about:
+- Exact API endpoints for each wireframe screen
+- Request and response formats
+- Query parameters
+- JSON payload examples
+
 ## API Integration Specifications
 
 ### 1. Authentication

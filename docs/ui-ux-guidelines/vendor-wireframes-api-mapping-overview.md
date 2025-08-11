@@ -70,7 +70,7 @@ For detailed API documentation, refer to [API Documentation](/docs/api/api-endpo
 
 ### Dashboard Home Screen
 
-**Wireframe Reference**: [Vendor Dashboard Home](/docs/ui-ux-guidelines/wireframes.md)
+**Wireframe Reference**: [Vendor Dashboard Home](/docs/ui-ux-guidelines/vendor-dashboard-overview.md)
 
 **API Endpoints**:
 
