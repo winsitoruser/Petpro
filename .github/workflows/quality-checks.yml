@@ -1,0 +1,88 @@
+name: Code Quality Checks
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        required: true
+        type: string
+        description: 'Directory containing the code to check'
+      node-version:
+        required: false
+        type: string
+        default: '18'
+        description: 'Node.js version to use'
+      eslint:
+        required: false
+        type: boolean
+        default: true
+        description: 'Run ESLint'
+      prettier:
+        required: false
+        type: boolean
+        default: true
+        description: 'Run Prettier'
+      typescript:
+        required: false
+        type: boolean
+        default: true
+        description: 'Run TypeScript checks'
+      sonarqube:
+        required: false
+        type: boolean
+        default: false
+        description: 'Run SonarQube analysis'
+
+jobs:
+  quality-checks:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for SonarQube
+
+      - name: Set up Node.js ${{ inputs.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ inputs.working-directory }}
+        run: npm ci
+
+      - name: ESLint
+        if: ${{ inputs.eslint }}
+        working-directory: ${{ inputs.working-directory }}
+        run: npm run lint || (echo "::error::ESLint found issues. Please fix them before merging." && exit 1)
+
+      - name: Prettier check
+        if: ${{ inputs.prettier }}
+        working-directory: ${{ inputs.working-directory }}
+        run: npx prettier --check "**/*.{js,jsx,ts,tsx,json,css,scss,md}" || (echo "::error::Code formatting issues found. Please run prettier to fix them." && exit 1)
+
+      - name: TypeScript check
+        if: ${{ inputs.typescript }}
+        working-directory: ${{ inputs.working-directory }}
+        run: npx tsc --noEmit || (echo "::error::TypeScript type errors found." && exit 1)
+
+      - name: SonarQube Scan
+        if: ${{ inputs.sonarqube }}
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN || '' }}
+        with:
+          projectBaseDir: ${{ inputs.working-directory }}
+
+      - name: Bundle size check
+        if: ${{ inputs.typescript }}
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          if [ -f "package.json" ] && grep -q "bundlesize" "package.json"; then
+            npx bundlesize
+          else
+            echo "Bundlesize not configured, skipping check"
+          fi

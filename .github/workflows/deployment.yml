@@ -1,0 +1,193 @@
+name: Deployment Workflow
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+        description: 'Environment to deploy to (staging or production)'
+      service-name:
+        required: true
+        type: string
+        description: 'Name of the service being deployed'
+      working-directory:
+        required: true
+        type: string
+        description: 'Directory containing the code to deploy'
+      build-command:
+        required: false
+        type: string
+        default: 'npm run build'
+        description: 'Command to build the application'
+      aws-region:
+        required: false
+        type: string
+        default: 'us-east-1'
+        description: 'AWS region to deploy to'
+      docker-build:
+        required: false
+        type: boolean
+        default: false
+        description: 'Whether to build a Docker image'
+      dockerfile-path:
+        required: false
+        type: string
+        default: 'Dockerfile.prod'
+        description: 'Path to the Dockerfile to use'
+      ecr-repository:
+        required: false
+        type: string
+        description: 'Name of the ECR repository to push to'
+      s3-deploy:
+        required: false
+        type: boolean
+        default: false
+        description: 'Whether to deploy to S3'
+      s3-bucket-var:
+        required: false
+        type: string
+        description: 'Name of the GitHub secret containing the S3 bucket name'
+      cloudfront-distribution-var:
+        required: false
+        type: string
+        description: 'Name of the GitHub secret containing the CloudFront distribution ID'
+      build-output-dir:
+        required: false
+        type: string
+        default: 'build'
+        description: 'Directory containing the build output to deploy'
+      slack-notification:
+        required: false
+        type: boolean
+        default: true
+        description: 'Whether to send Slack notifications'
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.service-name }} to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID || '' }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY || '' }}
+          aws-region: ${{ inputs.aws-region }}
+      
+      - name: Set up Node.js
+        if: ${{ !inputs.docker-build || inputs.s3-deploy }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+      
+      - name: Install dependencies
+        if: ${{ !inputs.docker-build || inputs.s3-deploy }}
+        working-directory: ${{ inputs.working-directory }}
+        run: npm ci
+      
+      - name: Run build
+        if: ${{ !inputs.docker-build || inputs.s3-deploy }}
+        working-directory: ${{ inputs.working-directory }}
+        run: ${{ inputs.build-command }}
+      
+      # Docker build and deploy to ECR/ECS
+      - name: Login to Amazon ECR
+        if: ${{ inputs.docker-build }}
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      
+      - name: Set Docker build environment variables
+        if: ${{ inputs.docker-build }}
+        run: |
+          echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
+          echo "ECR_REPOSITORY=${{ inputs.ecr-repository }}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${{ inputs.environment }}-${{ github.sha }}" >> $GITHUB_ENV
+          echo "LATEST_TAG=${{ inputs.environment }}-latest" >> $GITHUB_ENV
+      
+      - name: Build, tag, and push Docker image to Amazon ECR
+        if: ${{ inputs.docker-build }}
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ${{ inputs.dockerfile-path }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$LATEST_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$LATEST_TAG
+      
+      - name: Deploy to ECS
+        if: ${{ inputs.docker-build }}
+        run: |
+          aws ecs update-service --cluster petpro-${{ inputs.environment }} --service petpro-${{ inputs.service-name }}-${{ inputs.environment }} --force-new-deployment
+      
+      # S3/CloudFront deployment for static sites
+      - name: Get S3 bucket name
+        if: ${{ inputs.s3-deploy }}
+        run: |
+          BUCKET_NAME="${{ secrets[inputs.s3-bucket-var] }}"
+          echo "S3_BUCKET=$BUCKET_NAME" >> $GITHUB_ENV
+      
+      - name: Deploy to S3
+        if: ${{ inputs.s3-deploy }}
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          aws s3 sync ${{ inputs.build-output-dir }}/ s3://$S3_BUCKET/ --delete
+      
+      - name: Invalidate CloudFront cache
+        if: ${{ inputs.s3-deploy && inputs.cloudfront-distribution-var != '' }}
+        run: |
+          DISTRIBUTION_ID="${{ secrets[inputs.cloudfront-distribution-var] }}"
+          aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*"
+      
+      - name: Set deployment status
+        id: status
+        run: echo "status=success" >> $GITHUB_OUTPUT
+      
+      # Slack notifications
+      - name: Send Slack notification on success
+        if: ${{ inputs.slack-notification && steps.status.outputs.status == 'success' }}
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "✅ Successfully deployed ${{ inputs.service-name }} to ${{ inputs.environment }} environment.",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "✅ Deployment Successful"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Service:*\n${{ inputs.service-name }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Environment:*\n${{ inputs.environment }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Deployed by:*\n${{ github.actor }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Commit:*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL || '' }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

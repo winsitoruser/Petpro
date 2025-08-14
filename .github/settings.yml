@@ -1,0 +1,139 @@
+# Repository settings managed by probot/settings GitHub app
+# https://github.com/probot/settings
+
+repository:
+  # Repository name and description
+  name: petpro
+  description: PetPro - Pet Services Platform
+  
+  # See https://docs.github.com/en/rest/reference/repos#update-a-repository for all available settings
+  private: true
+  has_issues: true
+  has_projects: true
+  has_wiki: false
+  has_downloads: false
+  
+  # Either `true` to enable the wiki, `false` to disable it.
+  has_wiki: true
+  
+  # Either `true` to make the repository archived and read-only, or `false` to unarchive it.
+  archived: false
+  
+  # Either `true` to allow squash-merging pull requests, or `false` to prevent
+  # squash-merging.
+  allow_squash_merge: true
+  
+  # Either `true` to allow merging pull requests with a merge commit, or `false`
+  # to prevent merging pull requests with merge commits.
+  allow_merge_commit: false
+  
+  # Either `true` to allow rebase-merging pull requests, or `false` to prevent
+  # rebase-merging.
+  allow_rebase_merge: true
+  
+  # Either `true` to enable automatic deletion of branches on merge, or `false` to disable
+  delete_branch_on_merge: true
+  
+  # Either `true` to enable automated security fixes, or `false` to disable
+  # automated security fixes.
+  enable_automated_security_fixes: true
+  
+  # Either `true` to enable vulnerability alerts, or `false` to disable
+  # vulnerability alerts.
+  enable_vulnerability_alerts: true
+
+# Labels to be managed
+labels:
+  - name: bug
+    color: d73a4a
+    description: Something isn't working
+  
+  - name: documentation
+    color: 0075ca
+    description: Improvements or additions to documentation
+  
+  - name: enhancement
+    color: a2eeef
+    description: New feature or request
+  
+  - name: help wanted
+    color: 008672
+    description: Extra attention is needed
+  
+  - name: question
+    color: d876e3
+    description: Further information is requested
+  
+  - name: dependencies
+    color: 0366d6
+    description: Pull requests that update a dependency file
+  
+  - name: security
+    color: e60a0a
+    description: Security related issues and updates
+  
+  - name: backend
+    color: 1d76db
+    description: Related to the backend
+  
+  - name: frontend
+    color: 0e8a16
+    description: Related to the frontend
+  
+  - name: mobile-app
+    color: fbca04
+    description: Related to the mobile app
+
+# Branch protection rules
+branches:
+  - name: main
+    # https://docs.github.com/en/rest/reference/repos#update-branch-protection
+    protection:
+      # Required status checks to pass before merging
+      required_status_checks:
+        # Require branches to be up to date before merging
+        strict: true
+        # Status checks that are required
+        contexts:
+          - "CI/CD Pipeline"
+      
+      # Require signed commits
+      required_signatures: true
+      
+      # Required pull request reviews settings
+      required_pull_request_reviews:
+        # Dismiss approved reviews when a new commit is pushed
+        dismiss_stale_reviews: true
+        # Require approval from code owners before merging
+        require_code_owner_reviews: true
+        # Required number of approvals
+        required_approving_review_count: 1
+        # Allow specified users to bypass pull request requirements
+        bypass_pull_request_allowances:
+          users: []
+          teams: []
+      
+      # Enforce all configured restrictions for administrators
+      enforce_admins: false
+      
+      # Restrict who can push to matching branches
+      restrictions:
+        users: []
+        teams: []
+        apps: []
+  
+  - name: develop
+    protection:
+      required_status_checks:
+        strict: true
+        contexts:
+          - "CI/CD Pipeline"
+      
+      required_pull_request_reviews:
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: false
+        required_approving_review_count: 1
+      
+      enforce_admins: false
+      
+      restrictions: null

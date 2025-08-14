@@ -1,0 +1,107 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+jobs:
+  # Run quality checks for the backend code
+  quality:
+    name: Backend Quality Checks
+    uses: ./.github/workflows/quality-checks.yml
+    with:
+      working-directory: ./backend
+      node-version: '18'
+      eslint: true
+      prettier: true
+      typescript: true
+      sonarqube: true
+    secrets: inherit
+
+  # Build and test the backend
+  build-and-test:
+    runs-on: ubuntu-latest
+    needs: quality
+
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: petpro_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:6-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Set environment variables for testing
+        run: |
+          echo "NODE_ENV=test" >> $GITHUB_ENV
+          echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/petpro_test" >> $GITHUB_ENV
+          echo "REDIS_URL=redis://localhost:6379" >> $GITHUB_ENV
+          echo "JWT_SECRET=test_jwt_secret" >> $GITHUB_ENV
+
+      - name: Run tests
+        working-directory: ./backend
+        run: npm test -- --coverage
+
+      - name: Build
+        working-directory: ./backend
+        run: npm run build
+
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-build
+          path: backend/dist
+          retention-days: 1
+
+  # Handle test coverage separately
+  coverage:
+    name: Backend Test Coverage
+    needs: build-and-test
+    uses: ./.github/workflows/test-coverage.yml
+    with:
+      working-directory: ./backend
+      coverage-directory: coverage
+      flags: backend
+      name: backend-coverage
+      min-coverage: 75
+      test-command: npm test -- --coverage
+    secrets: inherit

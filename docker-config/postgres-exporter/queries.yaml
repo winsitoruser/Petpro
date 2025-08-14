@@ -1,0 +1,224 @@
+# Custom PostgreSQL monitoring queries for Prometheus exporter
+# These queries collect key metrics for the PetPro application
+
+pg_database_size:
+  query: "SELECT pg_database.datname as database_name, pg_database_size(pg_database.datname) as size_bytes FROM pg_database"
+  metrics:
+    - database_name:
+        usage: "LABEL"
+        description: "Name of the database"
+    - size_bytes:
+        usage: "GAUGE"
+        description: "Size of the database in bytes"
+
+pg_stat_activity:
+  query: |
+    SELECT 
+      pg_database.datname AS database_name,
+      state, 
+      count(*) AS count
+    FROM pg_stat_activity
+    JOIN pg_database ON pg_database.oid = pg_stat_activity.datid
+    WHERE state IS NOT NULL
+    GROUP BY database_name, state
+  metrics:
+    - database_name:
+        usage: "LABEL"
+        description: "Name of the database"
+    - state:
+        usage: "LABEL"
+        description: "Connection state (active, idle, idle in transaction, etc)"
+    - count:
+        usage: "GAUGE"
+        description: "Number of connections in this state"
+
+pg_stat_user_tables:
+  query: |
+    SELECT
+      current_database() as database_name,
+      schemaname,
+      relname as table_name,
+      seq_scan,
+      seq_tup_read,
+      idx_scan,
+      idx_tup_fetch,
+      n_tup_ins,
+      n_tup_upd,
+      n_tup_del,
+      n_live_tup,
+      n_dead_tup,
+      last_vacuum,
+      last_autovacuum,
+      last_analyze,
+      last_autoanalyze
+    FROM pg_stat_user_tables
+  metrics:
+    - database_name:
+        usage: "LABEL"
+        description: "Name of the database"
+    - schemaname:
+        usage: "LABEL"
+        description: "Schema name"
+    - table_name:
+        usage: "LABEL"
+        description: "Table name"
+    - seq_scan:
+        usage: "COUNTER"
+        description: "Number of sequential scans"
+    - seq_tup_read:
+        usage: "COUNTER"
+        description: "Number of tuples read by sequential scans"
+    - idx_scan:
+        usage: "COUNTER"
+        description: "Number of index scans"
+    - idx_tup_fetch:
+        usage: "COUNTER"
+        description: "Number of tuples fetched by index scans"
+    - n_tup_ins:
+        usage: "COUNTER"
+        description: "Number of rows inserted"
+    - n_tup_upd:
+        usage: "COUNTER"
+        description: "Number of rows updated"
+    - n_tup_del:
+        usage: "COUNTER"
+        description: "Number of rows deleted"
+    - n_live_tup:
+        usage: "GAUGE"
+        description: "Number of live tuples"
+    - n_dead_tup:
+        usage: "GAUGE"
+        description: "Number of dead tuples"
+
+pg_locks:
+  query: |
+    SELECT
+      pg_database.datname as database_name,
+      mode,
+      locktype,
+      count(*) as lock_count
+    FROM pg_locks
+    JOIN pg_database ON pg_database.oid = pg_locks.database
+    GROUP BY database_name, mode, locktype
+  metrics:
+    - database_name:
+        usage: "LABEL"
+        description: "Name of the database"
+    - mode:
+        usage: "LABEL"
+        description: "Lock mode"
+    - locktype:
+        usage: "LABEL"
+        description: "Type of the lock"
+    - lock_count:
+        usage: "GAUGE"
+        description: "Number of locks"
+
+pg_stat_statements:
+  query: |
+    SELECT
+      pg_database.datname as database_name,
+      queryid,
+      calls,
+      total_time,
+      min_time,
+      max_time,
+      mean_time,
+      stddev_time,
+      rows
+    FROM pg_stat_statements
+    JOIN pg_database ON pg_database.oid = pg_stat_statements.dbid
+    ORDER BY total_time DESC
+    LIMIT 100
+  metrics:
+    - database_name:
+        usage: "LABEL"
+        description: "Name of the database"
+    - queryid:
+        usage: "LABEL"
+        description: "Query identifier"
+    - calls:
+        usage: "COUNTER"
+        description: "Number of times query was executed"
+    - total_time:
+        usage: "COUNTER"
+        description: "Total time spent executing query, in milliseconds"
+    - min_time:
+        usage: "GAUGE"
+        description: "Minimum time spent executing query, in milliseconds"
+    - max_time:
+        usage: "GAUGE"
+        description: "Maximum time spent executing query, in milliseconds"
+    - mean_time:
+        usage: "GAUGE"
+        description: "Mean time spent executing query, in milliseconds"
+    - stddev_time:
+        usage: "GAUGE"
+        description: "Standard deviation of time spent executing query, in milliseconds"
+    - rows:
+        usage: "COUNTER"
+        description: "Total number of rows retrieved or affected by the query"
+
+pg_stat_bgwriter:
+  query: "SELECT * FROM pg_stat_bgwriter"
+  metrics:
+    - checkpoints_timed:
+        usage: "COUNTER"
+        description: "Number of scheduled checkpoints"
+    - checkpoints_req:
+        usage: "COUNTER"
+        description: "Number of requested checkpoints"
+    - checkpoint_write_time:
+        usage: "COUNTER"
+        description: "Total time spent writing checkpoints to disk, in milliseconds"
+    - checkpoint_sync_time:
+        usage: "COUNTER"
+        description: "Total time spent synchronizing checkpoints to disk, in milliseconds"
+    - buffers_checkpoint:
+        usage: "COUNTER"
+        description: "Number of buffers written during checkpoints"
+    - buffers_clean:
+        usage: "COUNTER"
+        description: "Number of buffers written by the background writer"
+    - maxwritten_clean:
+        usage: "COUNTER"
+        description: "Number of times the background writer stopped a cleaning scan because it had written too many buffers"
+    - buffers_backend:
+        usage: "COUNTER"
+        description: "Number of buffers written directly by a backend"
+    - buffers_backend_fsync:
+        usage: "COUNTER"
+        description: "Number of times a backend had to execute its own fsync call"
+    - buffers_alloc:
+        usage: "COUNTER"
+        description: "Number of buffers allocated"
+
+pg_replication:
+  query: |
+    SELECT
+      client_addr,
+      state,
+      sent_lsn,
+      write_lsn,
+      flush_lsn,
+      replay_lsn,
+      (extract(epoch from now()) - extract(epoch from backend_start))::int as backend_age_seconds,
+      (extract(epoch from now()) - extract(epoch from state_change))::int as state_age_seconds,
+      pg_wal_lsn_diff(sent_lsn, replay_lsn) as lag_bytes
+    FROM pg_stat_replication
+  metrics:
+    - client_addr:
+        usage: "LABEL"
+        description: "IP address of the replica"
+    - state:
+        usage: "LABEL"
+        description: "Current WAL sender state"
+    - backend_age_seconds:
+        usage: "GAUGE"
+        description: "Time since WAL sender process was started, in seconds"
+    - state_age_seconds:
+        usage: "GAUGE"
+        description: "Time since WAL sender state last changed, in seconds"
+    - lag_bytes:
+        usage: "GAUGE"
+        description: "Replication lag in bytes"

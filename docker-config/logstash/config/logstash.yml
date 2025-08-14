@@ -1,0 +1,17 @@
+http.host: "0.0.0.0"
+monitoring.elasticsearch.hosts: ["http://elasticsearch:9200"]
+monitoring.elasticsearch.username: "${ELASTICSEARCH_USERNAME}"
+monitoring.elasticsearch.password: "${ELASTICSEARCH_PASSWORD}"
+
+xpack.monitoring.enabled: true
+xpack.monitoring.elasticsearch.hosts: ["http://elasticsearch:9200"]
+xpack.monitoring.elasticsearch.username: "${ELASTICSEARCH_USERNAME}"
+xpack.monitoring.elasticsearch.password: "${ELASTICSEARCH_PASSWORD}"
+
+config.reload.automatic: true
+config.reload.interval: 30s
+log.level: info
+pipeline.workers: 2
+pipeline.batch.size: 125
+pipeline.batch.delay: 50
+deadLetterQueueEnabled: true

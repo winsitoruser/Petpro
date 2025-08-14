@@ -1,0 +1,89 @@
+groups:
+  - name: petpro_alerts
+    rules:
+      # Database Query Alerts
+      - alert: HighQueryErrorRate
+        expr: sum by (repository, method) (rate(repository_query_errors_total[5m])) / sum by (repository, method) (rate(repository_queries_total[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High query error rate in {{ $labels.repository }}.{{ $labels.method }}"
+          description: "Query error rate is {{ $value | humanizePercentage }} for the last 5 minutes in {{ $labels.repository }}.{{ $labels.method }}"
+
+      - alert: SlowQueries
+        expr: histogram_quantile(0.95, sum by (repository, method, le) (rate(repository_query_duration_seconds_bucket[5m]))) > 1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow queries detected in {{ $labels.repository }}.{{ $labels.method }}"
+          description: "95th percentile of query duration is {{ $value }} seconds for {{ $labels.repository }}.{{ $labels.method }}"
+
+      # Cache Alerts
+      - alert: LowCacheHitRate
+        expr: sum by (repository, method) (rate(repository_cache_hits_total[10m])) / sum by (repository, method) (rate(repository_cache_operations_total[10m])) < 0.50
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "Low cache hit rate for {{ $labels.repository }}.{{ $labels.method }}"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} for the last 10 minutes"
+
+      - alert: HighCacheErrorRate
+        expr: sum by (repository, method) (rate(repository_cache_errors_total[5m])) / sum by (repository, method) (rate(repository_cache_operations_total[5m])) > 0.05
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High cache error rate in {{ $labels.repository }}.{{ $labels.method }}"
+          description: "Cache error rate is {{ $value | humanizePercentage }} for the last 5 minutes"
+
+      # Transaction Alerts
+      - alert: HighTransactionErrorRate
+        expr: sum by (repository, method) (rate(repository_transaction_errors_total[5m])) / sum by (repository, method) (rate(repository_transactions_total[5m])) > 0.05
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High transaction error rate in {{ $labels.repository }}.{{ $labels.method }}"
+          description: "Transaction error rate is {{ $value | humanizePercentage }} for the last 5 minutes"
+
+      - alert: LongRunningTransactions
+        expr: histogram_quantile(0.95, sum by (repository, method, le) (rate(repository_transaction_duration_seconds_bucket[5m]))) > 5
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Long running transactions in {{ $labels.repository }}.{{ $labels.method }}"
+          description: "95th percentile of transaction duration is {{ $value }} seconds"
+
+      # Database Health
+      - alert: DatabaseConnectionDown
+        expr: database_health_check != 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database connection is down"
+          description: "The database health check has failed"
+
+      # Redis Health
+      - alert: RedisConnectionDown
+        expr: redis_up != 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis connection is down"
+          description: "Redis health check has failed"
+
+      # Repository-specific Alerts
+      - alert: HighUserRepositoryLoadTime
+        expr: histogram_quantile(0.95, sum by (le) (rate(repository_query_duration_seconds_bucket{repository="UserRepository"}[5m]))) > 0.5
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "User repository operations are slow"
+          description: "95th percentile of user repository operations is {{ $value }} seconds"

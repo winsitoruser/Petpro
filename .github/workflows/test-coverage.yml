@@ -1,0 +1,86 @@
+name: Test Coverage
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        required: true
+        type: string
+        description: 'Directory containing the code to test'
+      coverage-directory:
+        required: false
+        type: string
+        description: 'Directory containing coverage reports'
+        default: 'coverage'
+      flags:
+        required: true
+        type: string
+        description: 'Flags for codecov to identify the project'
+      name:
+        required: true
+        type: string
+        description: 'Coverage report name'
+      node-version:
+        required: false
+        type: string
+        default: '18'
+        description: 'Node.js version to use'
+      test-command:
+        required: false
+        type: string
+        default: 'npm test -- --coverage'
+        description: 'Command to run tests with coverage'
+      min-coverage:
+        required: false
+        type: number
+        default: 70
+        description: 'Minimum coverage percentage'
+
+jobs:
+  test-coverage:
+    name: Test Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js ${{ inputs.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ inputs.working-directory }}
+        run: npm ci
+
+      - name: Run tests with coverage
+        working-directory: ${{ inputs.working-directory }}
+        run: ${{ inputs.test-command }}
+
+      - name: Check minimum coverage
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          TOTAL_COVERAGE=$(cat ${{ inputs.coverage-directory }}/coverage-summary.json | jq -r '.total.statements.pct')
+          echo "Total coverage: $TOTAL_COVERAGE%"
+          if (( $(echo "$TOTAL_COVERAGE < ${{ inputs.min-coverage }}" | bc -l) )); then
+            echo "::error::Coverage ($TOTAL_COVERAGE%) is below the minimum required coverage (${{ inputs.min-coverage }}%)."
+            exit 1
+          fi
+        # This script assumes you're using Istanbul/NYC for coverage, which produces a coverage-summary.json file
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN || '' }}
+          directory: ${{ inputs.working-directory }}/${{ inputs.coverage-directory }}
+          flags: ${{ inputs.flags }}
+          name: ${{ inputs.name }}
+          fail_ci_if_error: false
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report-${{ inputs.flags }}
+          path: ${{ inputs.working-directory }}/${{ inputs.coverage-directory }}
+          retention-days: 14

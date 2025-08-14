@@ -1,0 +1,53 @@
+name: Web Vendor Deployment
+
+on:
+  workflow_run:
+    workflows: ["Web Vendor CI"]
+    branches: [main, develop]
+    types: [completed]
+
+jobs:
+  # Determine the environment to deploy to based on the branch
+  prepare-deployment:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      environment: ${{ steps.set-env.outputs.environment }}
+      should-deploy: ${{ steps.set-env.outputs.should-deploy }}
+    steps:
+      - name: Set environment based on branch
+        id: set-env
+        run: |
+          if [[ "${{ github.event.workflow_run.head_branch }}" == "main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.workflow_run.head_branch }}" == "develop" ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "environment=development" >> $GITHUB_OUTPUT
+            echo "should-deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Deploy to the determined environment using the reusable workflow
+  deploy:
+    needs: prepare-deployment
+    if: ${{ needs.prepare-deployment.outputs.should-deploy == 'true' }}
+    uses: ./.github/workflows/deployment.yml
+    with:
+      environment: ${{ needs.prepare-deployment.outputs.environment }}
+      service-name: web-vendor
+      working-directory: ./web-vendor
+      build-command: |
+        if [[ "${{ needs.prepare-deployment.outputs.environment }}" == "production" ]]; then
+          REACT_APP_API_URL=https://api.petpro.com/api npm run build
+        else
+          REACT_APP_API_URL=https://staging-api.petpro.com/api npm run build
+        fi
+      s3-deploy: true
+      s3-bucket-var: ${{ format('AWS_{0}_VENDOR_BUCKET', needs.prepare-deployment.outputs.environment) }}
+      cloudfront-distribution-var: ${{ format('AWS_{0}_VENDOR_DISTRIBUTION', needs.prepare-deployment.outputs.environment) }}
+      build-output-dir: build
+      aws-region: us-east-1
+      slack-notification: true
+    secrets: inherit

@@ -1,0 +1,50 @@
+server.name: petpro-kibana
+server.host: "0.0.0.0"
+server.publicBaseUrl: "http://localhost:5601"
+
+# Elasticsearch connection settings
+elasticsearch.hosts: ["http://elasticsearch:9200"]
+elasticsearch.username: "${ELASTICSEARCH_USERNAME}"
+elasticsearch.password: "${ELASTICSEARCH_PASSWORD}"
+elasticsearch.requestTimeout: 60000
+elasticsearch.shardTimeout: 60000
+
+# Enable monitoring
+xpack.monitoring.ui.container.elasticsearch.enabled: true
+
+# Enable security for production environment
+xpack.security.enabled: true
+xpack.encryptedSavedObjects.encryptionKey: "${KIBANA_ENCRYPTION_KEY:at-least-32-characters-long-key}"
+
+# Enable reporting and alerting
+xpack.reporting.enabled: true
+xpack.reporting.capture.timeouts.waitForElements: 30000
+xpack.alerting.enabled: true
+
+# Watcher settings
+xpack.watcher.enabled: true
+
+# Email settings file (mounted as volume)
+email.config_file: "/usr/share/kibana/config/email-config.yml"
+
+# Set proper SSL settings
+server.ssl.enabled: false
+
+# Index management settings
+xpack.index_management.enabled: true
+
+# Enable Fleet management
+xpack.fleet.enabled: true
+
+# Default dashboard settings
+kibana.defaultAppId: "dashboard"
+dashboard.enabled: true
+
+# Configure Spaces
+xpack.spaces.enabled: true
+# Configure alerting 
+xpack.alerting.enabled: true
+xpack.actions.enabled: true
+
+# Increase timeout for longer searches
+elasticsearch.requestTimeout: 90000

@@ -1,0 +1,10 @@
+xpack.actions:
+  enabled: true
+  preconfigured:
+    .email:
+      service: gmail
+      user: alerts@petpro.example
+      password: "${SMTP_PASSWORD}"
+      host: smtp.gmail.com
+      port: 587
+      secure: false

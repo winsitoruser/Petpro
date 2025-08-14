@@ -1,0 +1,3 @@
+{"type":"index-pattern","id":"petpro-backend-*","attributes":{"title":"petpro-backend-*","timeFieldName":"@timestamp"}}
+{"type":"index-pattern","id":"petpro-alerts-*","attributes":{"title":"petpro-alerts-*","timeFieldName":"@timestamp"}}
+{"type":"index-pattern","id":"petpro-*","attributes":{"title":"petpro-*","timeFieldName":"@timestamp"}}

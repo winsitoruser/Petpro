@@ -1,0 +1,66 @@
+name: Mobile App CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'mobile-app/**'
+      - '.github/workflows/mobile-app-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'mobile-app/**'
+      - '.github/workflows/mobile-app-ci.yml'
+
+jobs:
+  # Quality checks job - runs linting, prettier, and TS checks
+  quality:
+    uses: ./.github/workflows/quality-checks.yml
+    with:
+      service-name: mobile-app
+      working-directory: ./mobile-app
+      run-prettier: true
+      run-typescript-check: true
+      sonar-scan: false
+    secrets: inherit
+  
+  # Build job - builds the app after quality checks pass
+  build:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: mobile-app/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: ./mobile-app
+        run: npm ci
+      
+      - name: Build
+        working-directory: ./mobile-app
+        run: npx expo export:web
+      
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: mobile-app-build
+          path: mobile-app/web-build
+          retention-days: 7
+  
+  # Test coverage job - runs tests and uploads coverage
+  coverage:
+    needs: build
+    uses: ./.github/workflows/test-coverage.yml
+    with:
+      service-name: mobile-app
+      working-directory: ./mobile-app
+      coverage-directory: ./coverage
+      coverage-flags: mobile-app
+      coverage-name: mobile-app-coverage
+    secrets: inherit

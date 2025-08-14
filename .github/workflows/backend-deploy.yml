@@ -1,0 +1,93 @@
+name: Backend Deployment
+
+on:
+  workflow_run:
+    workflows: ["Backend CI"]
+    branches: [main, develop]
+    types: [completed]
+
+jobs:
+  # Determine the environment to deploy to based on the branch
+  prepare-deployment:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      environment: ${{ steps.set-env.outputs.environment }}
+      should-deploy: ${{ steps.set-env.outputs.should-deploy }}
+    steps:
+      - name: Set environment based on branch
+        id: set-env
+        run: |
+          if [[ "${{ github.event.workflow_run.head_branch }}" == "main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.workflow_run.head_branch }}" == "develop" ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "environment=development" >> $GITHUB_OUTPUT
+            echo "should-deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Deploy to the determined environment using the reusable workflow
+  deploy:
+    needs: prepare-deployment
+    if: ${{ needs.prepare-deployment.outputs.should-deploy == 'true' }}
+    uses: ./.github/workflows/deployment.yml
+    with:
+      environment: ${{ needs.prepare-deployment.outputs.environment }}
+      service-name: backend
+      working-directory: ./backend
+      docker-build: true
+      dockerfile-path: Dockerfile.prod
+      ecr-repository: petpro-backend
+      aws-region: us-east-1
+      slack-notification: true
+    secrets: inherit
+    
+  # Post-deployment tasks (e.g., run database migrations)
+  post-deployment:
+    needs: [prepare-deployment, deploy]
+    if: ${{ needs.prepare-deployment.outputs.should-deploy == 'true' }}
+    runs-on: ubuntu-latest
+    environment: ${{ needs.prepare-deployment.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        env:
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_KEY }}
+          aws-region: us-east-1
+          
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci
+        
+      - name: Run database migrations
+        working-directory: ./backend
+        env:
+          DATABASE_URL_PRODUCTION: ${{ secrets.DATABASE_URL_PRODUCTION }}
+          DATABASE_URL_STAGING: ${{ secrets.DATABASE_URL_STAGING }}
+          DATABASE_URL_DEVELOPMENT: ${{ secrets.DATABASE_URL_DEVELOPMENT }}
+          ENVIRONMENT: ${{ needs.prepare-deployment.outputs.environment }}
+        run: |
+          if [[ "$ENVIRONMENT" == "production" ]]; then
+            export DATABASE_URL="$DATABASE_URL_PRODUCTION"
+          elif [[ "$ENVIRONMENT" == "staging" ]]; then
+            export DATABASE_URL="$DATABASE_URL_STAGING"
+          else
+            export DATABASE_URL="$DATABASE_URL_DEVELOPMENT"
+          fi
+          npm run migrate

@@ -1,0 +1,28 @@
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install expo-cli globally
+RUN npm install -g expo-cli
+
+# Add args from docker-compose
+ARG NODE_ENV=development
+ENV NODE_ENV=${NODE_ENV}
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy all files
+COPY . .
+
+# Expose the listening port
+EXPOSE 19000
+EXPOSE 19001
+EXPOSE 19002
+
+# Start Expo development server
+CMD ["npm", "start"]

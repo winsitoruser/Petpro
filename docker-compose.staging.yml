@@ -1,0 +1,70 @@
+version: '3.8'
+
+# Staging environment specific overrides
+services:
+  backend:
+    build:
+      dockerfile: Dockerfile.prod
+    environment:
+      - NODE_ENV=staging
+      - LOG_LEVEL=info
+    restart: always
+    # Use production build and startup for backend
+    command: ["node", "dist/index.js"]
+    # No volume mounts in staging for better performance
+    volumes: []
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 512M
+
+  web-vendor:
+    build:
+      dockerfile: Dockerfile.prod
+    environment:
+      - NODE_ENV=staging
+    # No volume mounts in staging for better performance
+    volumes: []
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  web-admin:
+    build:
+      dockerfile: Dockerfile.prod
+    environment:
+      - NODE_ENV=staging
+    # No volume mounts in staging for better performance
+    volumes: []
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # Configure PostgreSQL for staging
+  postgres:
+    environment:
+      - POSTGRES_DB=petpro_staging
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  # Configure Redis for staging
+  redis:
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  # We don't need mobile app in staging
+  mobile-app:
+    profiles:
+      - donotstart

@@ -1,0 +1,65 @@
+version: '3.8'
+
+# This override file is automatically loaded with docker-compose up in development
+# It contains development-specific configurations and should not be used in production
+
+services:
+  # Backend API service - development specific settings
+  backend:
+    # Enable debug port for Node.js debugging
+    ports:
+      - "9229:9229" # Node.js debug port
+    environment:
+      - NODE_ENV=development
+      - DEBUG=petpro:*
+      - LOG_LEVEL=debug
+    # Command to run with debugging enabled
+    command: ["npm", "run", "dev:debug"]
+
+  # PostgreSQL - development specific settings
+  postgres:
+    ports:
+      - "5432:5432" # Expose to host for direct DB access
+    environment:
+      - POSTGRES_DB=petpro_development
+    volumes:
+      # Mount SQL files for development
+      - ./backend/database/seeds:/docker-entrypoint-initdb.d/seeds:ro
+
+  # MinIO - development specific settings
+  minio:
+    # Development specific environment variables
+    environment:
+      - MINIO_BROWSER=on
+      - MINIO_BROWSER_REDIRECT_URL=http://localhost:9001
+
+  # MailHog - development specific settings
+  mailhog:
+    ports:
+      - "8025:8025" # Web UI exposed to host for mail testing
+
+  # Add pgAdmin for database management in development
+  pgadmin:
+    image: dpage/pgadmin4:7.4
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@petpro.local
+      - PGADMIN_DEFAULT_PASSWORD=adminpassword
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - petpro_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 256M
+
+volumes:
+  pgadmin_data:
+    name: petpro_pgadmin_data

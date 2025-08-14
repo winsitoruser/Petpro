@@ -1,0 +1,207 @@
+version: '3.8'
+
+# Production environment specific overrides
+services:
+  # Backend API service - production configuration
+  backend:
+    build:
+      dockerfile: Dockerfile.prod
+    environment:
+      - NODE_ENV=production
+      - LOG_LEVEL=warn
+      # Use secure log settings
+      - LOG_FORMAT=json
+    restart: always
+    # Use production build and startup for backend
+    command: ["node", "dist/index.js"]
+    # No volume mounts in production for better performance and security
+    volumes: []
+    # Enhanced security measures
+    security_opt:
+      - no-new-privileges:true
+    # Production health check with wider intervals
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${API_PORT:-8080}/health"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+        window: 120s
+      # Configure placement constraints for high availability
+      placement:
+        constraints:
+          - node.role==worker
+
+  # Web Vendor Portal - production configuration
+  web-vendor:
+    build:
+      dockerfile: Dockerfile.prod
+    environment:
+      - NODE_ENV=production
+      # Security headers for frontend
+      - SECURE_HEADERS=true
+    # No volume mounts in production for better performance and security
+    volumes: []
+    # Enhanced security measures
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${WEB_VENDOR_PORT:-3000}/health"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+        failure_action: rollback
+
+  # Web Admin Portal - production configuration
+  web-admin:
+    build:
+      dockerfile: Dockerfile.prod
+    environment:
+      - NODE_ENV=production
+      # Security headers for frontend
+      - SECURE_HEADERS=true
+      - CONTENT_SECURITY_POLICY=true
+    # No volume mounts in production for better performance and security
+    volumes: []
+    # Enhanced security measures
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${WEB_ADMIN_PORT:-3001}/health"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+        failure_action: rollback
+      placement:
+        constraints:
+          - node.role==worker
+
+  # Database configuration for production
+
+  # Configure PostgreSQL for production
+  postgres:
+    environment:
+      - POSTGRES_DB=petpro_production
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    # Add production-grade configs
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=512MB"
+      - "-c"
+      - "effective_cache_size=1536MB"
+      - "-c"
+      - "work_mem=5242kB"
+      - "-c"
+      - "maintenance_work_mem=256MB"
+      - "-c"
+      - "min_wal_size=1GB"
+      - "-c"
+      - "max_wal_size=4GB"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "wal_buffers=16MB"
+      - "-c"
+      - "default_statistics_target=100"
+
+  # Configure Redis for production
+  redis:
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "1gb", "--maxmemory-policy", "allkeys-lru"]
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    volumes:
+      - redis_data_prod:/data
+
+  # Add production-grade services
+  redis-replica:
+    image: redis:6-alpine
+    command: ["redis-server", "--replicaof", "redis", "6379"]
+    networks:
+      - petpro_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # Mobile App - not needed in production but configured for completeness
+  mobile-app:
+    build:
+      dockerfile: Dockerfile.prod
+    environment:
+      - NODE_ENV=production
+      - EXPO_NO_DOTENV=1
+    # No volume mounts in production for better performance and security
+    volumes: []
+    # Enhanced security measures
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    # Don't start in production
+    profiles:
+      - donotstart
+
+  # We don't need these in production
+  minio:
+    profiles:
+      - donotstart
+      
+  mailhog:
+    profiles:
+      - donotstart
+
+volumes:
+  postgres_data_prod:
+  redis_data_prod:

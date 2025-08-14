@@ -1,0 +1,116 @@
+{
+  "attributes": {
+    "actions": [
+      {
+        "group": "threshold met",
+        "id": "email-action",
+        "params": {
+          "to": ["alerts@petpro.example"],
+          "subject": "PetPro Alert: Critical Error Detected",
+          "message": "Critical error detected in PetPro system.\n\nTimestamp: {{context.timestamp}}\nService: {{context.service}}\nError Message: {{context.message}}\nRequest ID: {{context.request_id}}",
+          "format": "text"
+        }
+      }
+    ],
+    "alertTypeId": ".index-threshold",
+    "consumer": "alerts",
+    "enabled": true,
+    "name": "Critical Error Alert",
+    "params": {
+      "aggType": "count",
+      "termSize": 6,
+      "thresholdComparator": ">",
+      "timeWindowSize": 5,
+      "timeWindowUnit": "m",
+      "threshold": [0],
+      "index": ["petpro-backend-*"],
+      "timeField": "@timestamp",
+      "aggField": "level.keyword",
+      "groupBy": "top",
+      "termField": "service.keyword",
+      "searchConfiguration": {
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "term": {
+                  "level.keyword": "error"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "schedule": {
+      "interval": "1m"
+    },
+    "tags": [
+      "error",
+      "critical",
+      "monitoring"
+    ]
+  },
+  "id": "petpro-critical-error-alert",
+  "references": [],
+  "type": "alert"
+}
+{
+  "attributes": {
+    "actions": [
+      {
+        "group": "threshold met",
+        "id": "email-action",
+        "params": {
+          "to": ["alerts@petpro.example"],
+          "subject": "PetPro Alert: High API Error Rate",
+          "message": "High API error rate detected in PetPro system.\n\nTime period: {{context.periodStart}} to {{context.periodEnd}}\nEndpoint: {{context.groupBy}}\nError count: {{context.value}}",
+          "format": "text"
+        }
+      }
+    ],
+    "alertTypeId": ".index-threshold",
+    "consumer": "alerts",
+    "enabled": true,
+    "name": "High API Error Rate Alert",
+    "params": {
+      "aggType": "count",
+      "termSize": 10,
+      "thresholdComparator": ">",
+      "timeWindowSize": 5,
+      "timeWindowUnit": "m",
+      "threshold": [5],
+      "index": ["petpro-backend-*"],
+      "timeField": "@timestamp",
+      "aggField": "statusCode",
+      "groupBy": "top",
+      "termField": "url.keyword",
+      "searchConfiguration": {
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "range": {
+                  "statusCode": {
+                    "gte": 500
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "schedule": {
+      "interval": "5m"
+    },
+    "tags": [
+      "api",
+      "error-rate",
+      "monitoring"
+    ]
+  },
+  "id": "petpro-high-api-error-rate-alert",
+  "references": [],
+  "type": "alert"
+}
