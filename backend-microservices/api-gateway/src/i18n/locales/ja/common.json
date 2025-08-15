@@ -1,0 +1,44 @@
+{
+  "welcome": "PetProへようこそ",
+  "errors": {
+    "unauthorized": "このリソースにアクセスする権限がありません",
+    "not_found": "リソースが見つかりません",
+    "validation_error": "入力エラー",
+    "internal_server_error": "内部サーバーエラー",
+    "bad_request": "不正なリクエスト"
+  },
+  "auth": {
+    "login_success": "ログイン成功",
+    "login_failed": "メールアドレスまたはパスワードが無効です",
+    "logout_success": "ログアウト成功",
+    "registration_success": "登録が完了しました",
+    "email_already_exists": "このメールアドレスは既に使用されています",
+    "invalid_token": "無効または期限切れのトークン",
+    "password_reset_sent": "パスワードリセット手順がメールに送信されました",
+    "password_reset_success": "パスワードのリセットが成功しました",
+    "email_verification_sent": "確認メールを送信しました",
+    "email_verified": "メールの確認が完了しました"
+  },
+  "user": {
+    "profile_updated": "プロフィールが更新されました",
+    "account_disabled": "アカウントが無効になっています",
+    "password_changed": "パスワードが変更されました"
+  },
+  "booking": {
+    "created": "予約が作成されました",
+    "updated": "予約が更新されました",
+    "cancelled": "予約がキャンセルされました",
+    "slot_unavailable": "このスロットはもう利用できません",
+    "reservation_expired": "予約が期限切れになりました"
+  },
+  "pets": {
+    "created": "ペットが追加されました",
+    "updated": "ペット情報が更新されました",
+    "deleted": "ペットが削除されました"
+  },
+  "vendor": {
+    "application_submitted": "ベンダー申請が提出されました",
+    "application_approved": "ベンダー申請が承認されました",
+    "application_rejected": "ベンダー申請が拒否されました"
+  }
+}

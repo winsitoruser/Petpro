@@ -1,0 +1,44 @@
+{
+  "welcome": "Welcome to PetPro",
+  "errors": {
+    "unauthorized": "You are not authorized to access this resource",
+    "not_found": "Resource not found",
+    "validation_error": "Validation error",
+    "internal_server_error": "Internal server error",
+    "bad_request": "Bad request"
+  },
+  "auth": {
+    "login_success": "Login successful",
+    "login_failed": "Invalid email or password",
+    "logout_success": "Logout successful",
+    "registration_success": "Registration successful",
+    "email_already_exists": "Email already in use",
+    "invalid_token": "Invalid or expired token",
+    "password_reset_sent": "Password reset instructions sent to your email",
+    "password_reset_success": "Password reset successful",
+    "email_verification_sent": "Verification email sent",
+    "email_verified": "Email verified successfully"
+  },
+  "user": {
+    "profile_updated": "Profile updated successfully",
+    "account_disabled": "Your account has been disabled",
+    "password_changed": "Password changed successfully"
+  },
+  "booking": {
+    "created": "Booking created successfully",
+    "updated": "Booking updated successfully",
+    "cancelled": "Booking cancelled successfully",
+    "slot_unavailable": "This slot is no longer available",
+    "reservation_expired": "Reservation has expired"
+  },
+  "pets": {
+    "created": "Pet added successfully",
+    "updated": "Pet updated successfully",
+    "deleted": "Pet removed successfully"
+  },
+  "vendor": {
+    "application_submitted": "Vendor application submitted successfully",
+    "application_approved": "Your vendor application has been approved",
+    "application_rejected": "Your vendor application has been rejected"
+  }
+}

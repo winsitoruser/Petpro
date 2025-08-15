@@ -1,0 +1,44 @@
+{
+  "welcome": "Selamat datang di PetPro",
+  "errors": {
+    "unauthorized": "Anda tidak memiliki izin untuk mengakses sumber daya ini",
+    "not_found": "Sumber daya tidak ditemukan",
+    "validation_error": "Kesalahan validasi",
+    "internal_server_error": "Kesalahan server internal",
+    "bad_request": "Permintaan tidak valid"
+  },
+  "auth": {
+    "login_success": "Login berhasil",
+    "login_failed": "Email atau kata sandi tidak valid",
+    "logout_success": "Logout berhasil",
+    "registration_success": "Pendaftaran berhasil",
+    "email_already_exists": "Email sudah digunakan",
+    "invalid_token": "Token tidak valid atau kedaluwarsa",
+    "password_reset_sent": "Instruksi pengaturan ulang kata sandi telah dikirim ke email Anda",
+    "password_reset_success": "Pengaturan ulang kata sandi berhasil",
+    "email_verification_sent": "Email verifikasi telah dikirim",
+    "email_verified": "Email berhasil diverifikasi"
+  },
+  "user": {
+    "profile_updated": "Profil berhasil diperbarui",
+    "account_disabled": "Akun Anda telah dinonaktifkan",
+    "password_changed": "Kata sandi berhasil diubah"
+  },
+  "booking": {
+    "created": "Reservasi berhasil dibuat",
+    "updated": "Reservasi berhasil diperbarui",
+    "cancelled": "Reservasi berhasil dibatalkan",
+    "slot_unavailable": "Slot ini tidak tersedia lagi",
+    "reservation_expired": "Reservasi telah kedaluwarsa"
+  },
+  "pets": {
+    "created": "Hewan peliharaan berhasil ditambahkan",
+    "updated": "Hewan peliharaan berhasil diperbarui",
+    "deleted": "Hewan peliharaan berhasil dihapus"
+  },
+  "vendor": {
+    "application_submitted": "Aplikasi vendor berhasil dikirimkan",
+    "application_approved": "Aplikasi vendor Anda telah disetujui",
+    "application_rejected": "Aplikasi vendor Anda telah ditolak"
+  }
+}
