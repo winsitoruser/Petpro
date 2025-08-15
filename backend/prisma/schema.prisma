@@ -175,6 +175,31 @@ model UserRole {
 }
 
 // Authentication Models
+
+// OTP Model for verification and authentication
+model Otp {
+  id               String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId           String?  @map("user_id") @db.Uuid
+  otp              String   @db.VarChar(255) // Hashed OTP
+  type             String   @db.VarChar(50)  // REGISTRATION, LOGIN, PASSWORD_RESET, etc.
+  deliveryTarget   String   @map("delivery_target") @db.VarChar(255) // Email or phone
+  deliveryMethod   String   @map("delivery_method") @db.VarChar(20) // EMAIL, SMS
+  expiresAt        DateTime @map("expires_at") @db.Timestamptz
+  attempts         Int      @default(0) // Number of verification attempts
+  status           String   @default("ACTIVE") @db.VarChar(20) // ACTIVE, USED, EXPIRED, CANCELLED
+  usedAt           DateTime? @map("used_at") @db.Timestamptz
+  metadata         Json     @default("{}") // Additional data for specific OTP types
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime @default(now()) @map("updated_at") @db.Timestamptz
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([deliveryTarget])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("otps")
+}
 model RefreshToken {
   id        String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   userId    String    @map("user_id") @db.Uuid
