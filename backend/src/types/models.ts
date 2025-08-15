@@ -21,13 +21,7 @@ export enum PetSpecies {
   OTHER = 'other',
 }
 
-export enum AppointmentStatus {
-  SCHEDULED = 'scheduled',
-  CONFIRMED = 'confirmed',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
-  NO_SHOW = 'no_show',
-}
+// AppointmentStatus enum moved to booking-service microservice
 
 export enum OrderStatus {
   PENDING = 'pending',
@@ -269,51 +263,15 @@ export interface ClinicStaff extends BaseModel {
   
   // Virtual relations
   clinic?: Clinic;
-  availability?: StaffAvailability[];
+  // StaffAvailability has been moved to booking-service
+  availability?: any[];
 }
 
-export interface StaffAvailability extends BaseModel {
-  clinicId: string;
-  staffId: string;
-  dayOfWeek: number;
-  startTime: string;
-  endTime: string;
-  
-  // Virtual relations
-  clinic?: Clinic;
-  staff?: ClinicStaff;
-}
+// StaffAvailability interface moved to booking-service microservice
 
-export interface Appointment extends BaseModel {
-  clinicId: string;
-  serviceId: string;
-  staffId?: string;
-  userId: string;
-  petId: string;
-  startTime: Date;
-  endTime: Date;
-  status: AppointmentStatus;
-  notes?: string;
-  cancelledBy?: string;
-  cancelReason?: string;
-  
-  // Virtual relations
-  clinic?: Clinic;
-  service?: ClinicService;
-  staff?: ClinicStaff;
-  client?: User;
-  pet?: Pet;
-  appointmentNotes?: AppointmentNote[];
-}
+// Appointment interface moved to booking-service microservice
 
-export interface AppointmentNote extends BaseModel {
-  appointmentId: string;
-  note: string;
-  addedBy: string;
-  
-  // Virtual relations
-  appointment?: Appointment;
-}
+// AppointmentNote interface moved to booking-service microservice
 
 // Product Management Models
 export interface ProductCategory extends BaseModel {

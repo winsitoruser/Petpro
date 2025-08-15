@@ -1,12 +1,31 @@
 FROM node:18-alpine
 
+# Set working directory
 WORKDIR /app
 
-COPY package*.json ./
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
 
+# Install dependencies first (for better caching)
+COPY package*.json ./
 RUN npm install
 
+# Copy the rest of the application code
 COPY . .
+
+# Create a health check endpoint for Docker health checks
+RUN mkdir -p public && \
+    echo '{"status":"ok"}' > public/health
+
+# Create non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN chown -R appuser:appgroup /app
+USER appuser
+
+# Set environment variables
+ENV NODE_ENV=development
+ENV PORT=3000
 
 EXPOSE 3000
 

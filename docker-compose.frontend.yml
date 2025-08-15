@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # Admin Dashboard Frontend
+  web-admin:
+    build:
+      context: ./web-admin
+      dockerfile: Dockerfile.dev
+    container_name: petpro-admin-frontend
+    volumes:
+      - ./web-admin:/app
+      - /app/node_modules
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    networks:
+      - frontend-network
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 500M
+        reservations:
+          cpus: '0.25'
+          memory: 200M
+
+  # E-Commerce Frontend
+  web-vendor:
+    build:
+      context: ./web-vendor
+      dockerfile: Dockerfile.dev
+    container_name: petpro-vendor-frontend
+    volumes:
+      - ./web-vendor:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    networks:
+      - frontend-network
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 500M
+        reservations:
+          cpus: '0.25'
+          memory: 200M
+
+networks:
+  frontend-network:
+    driver: bridge

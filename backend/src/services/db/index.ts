@@ -10,7 +10,7 @@ export { default as BaseService } from './baseService';
 // User Management Services
 export { default as UserService } from './userService';
 export { default as AddressService } from './addressService';
-export { default as AuthService } from './authService';
+// AuthService moved to auth-service microservice
 export { default as RoleService } from './roleService';
 export { default as PermissionService } from './permissionService';
 
@@ -20,7 +20,6 @@ export { default as PetHealthService } from './petHealthService';
 
 // Clinic Management Services
 export { default as ClinicService } from './clinicService';
-export { default as AppointmentService } from './appointmentService';
 
 // Product Management Services
 export { default as ProductService } from './productService';
@@ -40,13 +39,12 @@ export { default as PaymentService } from './paymentService';
 import BaseService from './baseService';
 import UserService from './userService';
 import AddressService from './addressService';
-import AuthService from './authService';
+// AuthService moved to auth-service microservice
 import RoleService from './roleService';
 import PermissionService from './permissionService';
 import PetService from './petService';
 import PetHealthService from './petHealthService';
 import ClinicService from './clinicService';
-import AppointmentService from './appointmentService';
 import ProductService from './productService';
 import InventoryService from './inventoryService';
 import OrderService from './orderService';
@@ -59,7 +57,7 @@ export default {
   // User domain
   user: new UserService(),
   address: new AddressService(),
-  auth: new AuthService(),
+  // auth service moved to auth-service microservice
   role: new RoleService(),
   permission: new PermissionService(),
   
@@ -69,7 +67,6 @@ export default {
   
   // Clinic domain
   clinic: new ClinicService(),
-  appointment: new AppointmentService(),
   
   // Product domain
   product: new ProductService(),

@@ -13,23 +13,65 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci
 
-# Copy all files
+# Build stage
+FROM node:18-alpine AS build
+
+WORKDIR /app
+
+# Install dependencies first (better layer caching)
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy the rest of the application code
 COPY . .
 
 # Build the application
 RUN npm run build
 
-# Production image
-FROM nginx:alpine
+# Production stage
+FROM nginx:stable-alpine
 
-# Copy built assets from builder stage
-COPY --from=builder /app/build /usr/share/nginx/html
+# Create non-root user for nginx
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# Add nginx config
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:80/health || exit 1
+
+# Set proper permissions for nginx
+RUN chown -R appuser:appgroup /var/cache/nginx && \
+    chown -R appuser:appgroup /var/log/nginx && \
+    chown -R appuser:appgroup /etc/nginx/conf.d && \
+    touch /var/run/nginx.pid && \
+    chown -R appuser:appgroup /var/run/nginx.pid
+
+WORKDIR /usr/share/nginx/html
+
+# Copy custom nginx config
 COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose the listening port
+# Remove default nginx static assets
+RUN rm -rf ./*
+
+# Copy static assets from builder stage
+COPY --from=build /app/build .
+
+# Create health check endpoint for Docker health checks
+RUN mkdir -p health && echo '{"status":"ok"}' > health/index.html
+
+# Set security headers in Nginx config
+RUN echo "add_header X-Content-Type-Options nosniff;" >> /etc/nginx/conf.d/default.conf && \
+    echo "add_header X-Frame-Options DENY;" >> /etc/nginx/conf.d/default.conf && \
+    echo "add_header X-XSS-Protection \"1; mode=block\";" >> /etc/nginx/conf.d/default.conf
+
+# Run as non-root user
+USER appuser
+
+# Set resource limits
+ENV NGINX_WORKER_PROCESSES=auto
+ENV NGINX_WORKER_CONNECTIONS=1024
+
 EXPOSE 80
 
-# Start nginx
+# Containers run nginx with global directives and daemon off
 CMD ["nginx", "-g", "daemon off;"]
