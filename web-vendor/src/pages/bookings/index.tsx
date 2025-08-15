@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useSocket } from '../../contexts/SocketContext';
 import {
   CalendarIcon,
   PencilIcon,
@@ -11,20 +12,47 @@ import {
 } from '@heroicons/react/24/outline';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 
+// Define interfaces for booking and events
+interface Booking {
+  id: number | string;
+  customer: string;
+  pet: string;
+  service: string;
+  date: string;
+  time: string;
+  status: string;
+  notes: string;
+}
+
+interface BookingStatusUpdate {
+  bookingId: string;
+  status: string;
+  updatedAt: string;
+  message?: string;
+}
+
+interface NotificationEvent {
+  type: string;
+  title: string;
+  message: string;
+  bookingId?: string;
+}
+
 export default function Bookings() {
-  // Mock data for bookings
+  // Mock data for bookings - in production this would come from an API
   const initialBookings = [
-    { id: 1, customer: 'John Doe', pet: 'Max', service: 'Veterinary Checkup', date: '2025-08-20', time: '10:00 AM', status: 'confirmed', notes: 'Regular checkup' },
-    { id: 2, customer: 'Sarah Johnson', pet: 'Bella', service: 'Pet Grooming', date: '2025-08-21', time: '2:30 PM', status: 'pending', notes: 'First time customer' },
-    { id: 3, customer: 'Michael Chen', pet: 'Charlie', service: 'Vaccination', date: '2025-08-22', time: '11:15 AM', status: 'confirmed', notes: 'Annual booster' },
-    { id: 4, customer: 'Emily Rodriguez', pet: 'Luna', service: 'Dental Cleaning', date: '2025-08-23', time: '9:00 AM', status: 'confirmed', notes: 'Sensitive teeth' },
-    { id: 5, customer: 'David Wilson', pet: 'Cooper', service: 'Microchipping', date: '2025-08-24', time: '3:45 PM', status: 'pending', notes: 'New adoption' },
-    { id: 6, customer: 'Jennifer Miller', pet: 'Bailey', service: 'Nail Trimming', date: '2025-08-25', time: '1:15 PM', status: 'cancelled', notes: 'Aggressive behavior' },
-    { id: 7, customer: 'Robert Brown', pet: 'Daisy', service: 'Flea Treatment', date: '2025-08-26', time: '4:30 PM', status: 'confirmed', notes: 'Severe infestation' },
-    { id: 8, customer: 'Lisa Taylor', pet: 'Rocky', service: 'Eye Examination', date: '2025-08-27', time: '10:45 AM', status: 'pending', notes: 'Watery eyes' }
+    { id: '1', customer: 'John Doe', pet: 'Max', service: 'Veterinary Checkup', date: '2025-08-20', time: '10:00 AM', status: 'confirmed', notes: 'Regular checkup' },
+    { id: '2', customer: 'Sarah Johnson', pet: 'Bella', service: 'Pet Grooming', date: '2025-08-21', time: '2:30 PM', status: 'pending', notes: 'First time customer' },
+    { id: '3', customer: 'Michael Chen', pet: 'Charlie', service: 'Vaccination', date: '2025-08-22', time: '11:15 AM', status: 'confirmed', notes: 'Annual booster' },
+    { id: '4', customer: 'Emily Rodriguez', pet: 'Luna', service: 'Dental Cleaning', date: '2025-08-23', time: '9:00 AM', status: 'confirmed', notes: 'Sensitive teeth' },
+    { id: '5', customer: 'David Wilson', pet: 'Cooper', service: 'Microchipping', date: '2025-08-24', time: '3:45 PM', status: 'pending', notes: 'New adoption' },
+    { id: '6', customer: 'Jennifer Miller', pet: 'Bailey', service: 'Nail Trimming', date: '2025-08-25', time: '1:15 PM', status: 'cancelled', notes: 'Aggressive behavior' },
+    { id: '7', customer: 'Robert Brown', pet: 'Daisy', service: 'Flea Treatment', date: '2025-08-26', time: '4:30 PM', status: 'confirmed', notes: 'Severe infestation' },
+    { id: '8', customer: 'Lisa Taylor', pet: 'Rocky', service: 'Eye Examination', date: '2025-08-27', time: '10:45 AM', status: 'pending', notes: 'Watery eyes' }
   ];
 
-  const [bookings, setBookings] = useState(initialBookings);
+  const [bookings, setBookings] = useState<Booking[]>(initialBookings);
+  const socket = useSocket();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isCalendarView, setIsCalendarView] = useState(false);
@@ -66,19 +94,88 @@ export default function Bookings() {
   };
 
   // Actions
-  const handleStatusChange = (id, newStatus) => {
+  const handleStatusChange = (id: number | string, newStatus: string) => {
     setBookings(bookings.map(booking => 
       booking.id === id ? {...booking, status: newStatus} : booking
     ));
+    
+    // In a real implementation, this would call an API to update the booking status
+    // which would then trigger a WebSocket event from the server
+    // Here we're just simulating the state change locally
   };
 
-  const deleteBooking = (id) => {
+  const deleteBooking = (id: number | string) => {
     setBookings(bookings.filter(booking => booking.id !== id));
   };
 
-  const handleViewBooking = (booking) => {
+  const handleViewBooking = (booking: Booking) => {
     setSelectedBooking(booking);
     setIsModalOpen(true);
+    
+    // Join the booking-specific WebSocket room when viewing booking details
+    socket.joinBookingRoom(booking.id.toString());
+  };
+  
+  // Handle real-time booking status updates
+  const handleBookingStatusUpdate = useCallback((update: BookingStatusUpdate) => {
+    setBookings(prevBookings => {
+      return prevBookings.map(booking => {
+        if (booking.id.toString() === update.bookingId) {
+          return { ...booking, status: update.status };
+        }
+        return booking;
+      });
+    });
+    
+    // If the booking we're viewing was updated, update the selected booking as well
+    if (selectedBooking && selectedBooking.id.toString() === update.bookingId) {
+      setSelectedBooking(prev => prev ? { ...prev, status: update.status } : prev);
+    }
+  }, [selectedBooking]);
+  
+  // Subscribe to notifications (could show these in a notifications panel)
+  const handleNotification = useCallback((notification: NotificationEvent) => {
+    console.log('Notification received in Bookings component:', notification);
+    // Here you could update a notifications state or show a custom alert
+  }, []);
+  
+  // Setup WebSocket subscriptions
+  useEffect(() => {
+    // Subscribe to notifications
+    const unsubNotifications = socket.subscribeToNotifications(handleNotification);
+    
+    // When component unmounts, clean up subscriptions
+    return () => {
+      unsubNotifications();
+      
+      // If a booking was being viewed, leave its room
+      if (selectedBooking) {
+        socket.leaveBookingRoom(selectedBooking.id.toString());
+      }
+    };
+  }, [socket, handleNotification]);
+  
+  // Subscribe to booking updates when a booking is selected
+  useEffect(() => {
+    if (selectedBooking) {
+      // Subscribe to updates for the selected booking
+      const unsubBooking = socket.subscribeToBookingUpdates(
+        selectedBooking.id.toString(), 
+        handleBookingStatusUpdate
+      );
+      
+      return () => {
+        unsubBooking();
+      };
+    }
+  }, [selectedBooking, socket, handleBookingStatusUpdate]);
+  
+  // Close modal and leave booking room
+  const closeBookingModal = () => {
+    if (selectedBooking) {
+      socket.leaveBookingRoom(selectedBooking.id.toString());
+    }
+    setIsModalOpen(false);
   };
 
   return (
@@ -305,22 +402,22 @@ export default function Bookings() {
                         </div>
                         <div className="py-3 grid grid-cols-3">
                           <dt className="text-sm font-medium text-gray-500">Pet</dt>
-                          <dd className="text-sm text-gray-900 col-span-2">{selectedBooking.pet}</dd>
+                          <dd className="text-sm text-gray-900 col-span-2">{selectedBooking?.pet}</dd>
                         </div>
                         <div className="py-3 grid grid-cols-3">
                           <dt className="text-sm font-medium text-gray-500">Service</dt>
-                          <dd className="text-sm text-gray-900 col-span-2">{selectedBooking.service}</dd>
+                          <dd className="text-sm text-gray-900 col-span-2">{selectedBooking?.service}</dd>
                         </div>
                         <div className="py-3 grid grid-cols-3">
                           <dt className="text-sm font-medium text-gray-500">Date & Time</dt>
-                          <dd className="text-sm text-gray-900 col-span-2">{selectedBooking.date} at {selectedBooking.time}</dd>
+                          <dd className="text-sm text-gray-900 col-span-2">{selectedBooking?.date} at {selectedBooking?.time}</dd>
                         </div>
                         <div className="py-3 grid grid-cols-3">
                           <dt className="text-sm font-medium text-gray-500">Status</dt>
                           <dd className="text-sm col-span-2">
                             <select
-                              value={selectedBooking.status}
-                              onChange={(e) => handleStatusChange(selectedBooking.id, e.target.value)}
+                              value={selectedBooking?.status}
+                              onChange={(e) => selectedBooking && handleStatusChange(selectedBooking.id, e.target.value)}
                               className="focus:ring-primary-500 focus:border-primary-500 sm:text-sm border-gray-300 rounded-md"
                             >
                               <option value="confirmed">Confirmed</option>
@@ -331,7 +428,7 @@ export default function Bookings() {
                         </div>
                         <div className="py-3 grid grid-cols-3">
                           <dt className="text-sm font-medium text-gray-500">Notes</dt>
-                          <dd className="text-sm text-gray-900 col-span-2">{selectedBooking.notes}</dd>
+                          <dd className="text-sm text-gray-900 col-span-2">{selectedBooking?.notes}</dd>
                         </div>
                       </dl>
                     </div>
@@ -342,7 +439,7 @@ export default function Bookings() {
                 <button
                   type="button"
                   className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={closeBookingModal}
                 >
                   Close
                 </button>

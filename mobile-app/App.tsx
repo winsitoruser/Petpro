@@ -12,6 +12,7 @@ import { store } from './src/store';
 import { useAuth } from './src/hooks/useAuth';
 import { ThemeProvider } from './src/context/ThemeContext';
 import { LanguageProvider } from './src/contexts/LanguageContext';
+import { SocketProvider } from './src/contexts/SocketContext';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -64,7 +65,9 @@ export default function App() {
         <LanguageProvider>
           <SafeAreaProvider>
             <NavigationContainer>
-              <AppContent />
+              <SocketProvider>
+                <AppContent />
+              </SocketProvider>
             </NavigationContainer>
           </SafeAreaProvider>
         </LanguageProvider>

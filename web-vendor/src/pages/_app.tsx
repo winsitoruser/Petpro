@@ -4,6 +4,8 @@ import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { SessionProvider } from 'next-auth/react';
+import { SocketProvider } from '@/contexts/SocketContext';
 import { store } from '@/store';
 import MainLayout from '@/layouts/MainLayout';
 
@@ -17,15 +19,19 @@ const queryClient = new QueryClient({
   },
 });
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <MainLayout>
-          <Component {...pageProps} />
-          <ToastContainer position="top-right" autoClose={5000} />
-        </MainLayout>
-      </QueryClientProvider>
-    </Provider>
+    <SessionProvider session={session}>
+      <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
+          <SocketProvider>
+            <MainLayout>
+              <Component {...pageProps} />
+              <ToastContainer position="top-right" autoClose={5000} />
+            </MainLayout>
+          </SocketProvider>
+        </QueryClientProvider>
+      </Provider>
+    </SessionProvider>
   );
 }
