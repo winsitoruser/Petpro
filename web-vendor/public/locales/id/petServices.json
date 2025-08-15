@@ -1,0 +1,196 @@
+{
+  "dashboard": {
+    "title": "Dashboard Layanan Hewan",
+    "summary": "Ringkasan Dashboard",
+    "metrics": {
+      "hotelRooms": "Kamar Hotel",
+      "activeBookings": "Pemesanan Aktif",
+      "checkedInPets": "Hewan Terdaftar",
+      "groomingServices": "Layanan Grooming",
+      "upcomingGroomings": "Grooming Mendatang",
+      "totalRevenue": "Total Pendapatan"
+    },
+    "tabs": {
+      "petHotel": "Hotel Hewan",
+      "petGrooming": "Grooming Hewan",
+      "analytics": "Analitik"
+    }
+  },
+  "hotelManagement": {
+    "title": "Manajemen Hotel Hewan",
+    "tabs": {
+      "rooms": "Kamar",
+      "bookings": "Pemesanan",
+      "availability": "Ketersediaan"
+    },
+    "rooms": {
+      "title": "Kamar Hotel",
+      "addRoom": "Tambah Kamar",
+      "noRooms": "Belum ada kamar yang ditambahkan.",
+      "addRoomPrompt": "Klik tombol Tambah Kamar untuk membuat kamar pertama Anda.",
+      "form": {
+        "name": "Nama Kamar",
+        "type": "Tipe Kamar",
+        "capacity": "Kapasitas",
+        "petType": "Jenis Hewan",
+        "petSize": "Ukuran Hewan",
+        "price": "Harga per Malam",
+        "description": "Deskripsi",
+        "amenities": "Fasilitas",
+        "photos": "Foto"
+      },
+      "dialog": {
+        "title": "Tambah Kamar Baru",
+        "addPhotos": "Tambah Foto"
+      }
+    },
+    "bookings": {
+      "title": "Pemesanan Hotel",
+      "noBookings": "Tidak ditemukan pemesanan",
+      "noBookingsDescription": "Saat ini tidak ada pemesanan hotel hewan.",
+      "id": "ID Pemesanan",
+      "petName": "Nama Hewan",
+      "petType": "Jenis Hewan",
+      "owner": "Pemilik",
+      "room": "Kamar",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "status": "Status",
+      "price": "Harga",
+      "actions": "Tindakan",
+      "menu": {
+        "viewDetails": "Lihat Detail",
+        "updateStatus": "Perbarui Status",
+        "checkIn": "Check In",
+        "checkOut": "Check Out",
+        "cancel": "Batalkan Pemesanan"
+      },
+      "statusDialog": {
+        "title": "Perbarui Status Pemesanan",
+        "bookingId": "ID Pemesanan",
+        "petName": "Nama Hewan",
+        "room": "Kamar",
+        "currentStatus": "Status Saat Ini",
+        "newStatus": "Status Baru",
+        "notes": "Catatan"
+      }
+    }
+  },
+  "groomingManagement": {
+    "title": "Manajemen Grooming Hewan",
+    "tabs": {
+      "services": "Layanan",
+      "appointments": "Janji Temu",
+      "schedule": "Jadwal"
+    },
+    "services": {
+      "title": "Layanan Grooming",
+      "addService": "Tambah Layanan",
+      "noServices": "Belum ada layanan grooming yang ditambahkan.",
+      "addServicePrompt": "Klik tombol Tambah Layanan untuk membuat layanan grooming pertama Anda.",
+      "form": {
+        "name": "Nama Layanan",
+        "petType": "Jenis Hewan",
+        "petSize": "Ukuran Hewan",
+        "duration": "Durasi (menit)",
+        "price": "Harga",
+        "description": "Deskripsi",
+        "isActive": "Aktif"
+      },
+      "dialog": {
+        "title": "Tambah Layanan Grooming Baru",
+        "editTitle": "Edit Layanan Grooming"
+      }
+    }
+  },
+  "appointments": {
+    "title": "Janji Temu Grooming",
+    "noAppointments": "Tidak ditemukan janji temu",
+    "noAppointmentsDescription": "Saat ini tidak ada janji temu grooming hewan.",
+    "id": "ID Janji Temu",
+    "petName": "Nama Hewan",
+    "service": "Layanan",
+    "date": "Tanggal & Waktu",
+    "duration": "Durasi",
+    "status": "Status",
+    "price": "Harga",
+    "actions": "Tindakan",
+    "menu": {
+      "viewDetails": "Lihat Detail",
+      "updateStatus": "Perbarui Status",
+      "markCompleted": "Tandai Selesai",
+      "cancel": "Batalkan Janji Temu",
+      "reschedule": "Jadwalkan Ulang"
+    },
+    "statusDialog": {
+      "title": "Perbarui Status Janji Temu",
+      "appointmentId": "ID Janji Temu",
+      "petName": "Nama Hewan",
+      "service": "Layanan",
+      "currentStatus": "Status Saat Ini",
+      "newStatus": "Status Baru",
+      "notes": "Catatan"
+    }
+  },
+  "analytics": {
+    "title": "Ringkasan Analitik",
+    "revenue": "Pendapatan",
+    "periodSelector": {
+      "daily": "Harian",
+      "weekly": "Mingguan",
+      "monthly": "Bulanan",
+      "yearly": "Tahunan"
+    },
+    "occupancyRate": "Tingkat Okupansi",
+    "serviceDistribution": "Distribusi Layanan",
+    "topServices": "Layanan Teratas"
+  },
+  "petTypes": {
+    "dog": "Anjing",
+    "cat": "Kucing",
+    "bird": "Burung",
+    "small_mammal": "Mamalia Kecil",
+    "reptile": "Reptil",
+    "fish": "Ikan",
+    "other": "Lainnya"
+  },
+  "petSizes": {
+    "xsmall": "Sangat Kecil",
+    "small": "Kecil",
+    "medium": "Sedang",
+    "large": "Besar",
+    "xlarge": "Sangat Besar"
+  },
+  "appointmentStatus": {
+    "pending": "Tertunda",
+    "confirmed": "Terkonfirmasi",
+    "in_progress": "Dalam Proses",
+    "completed": "Selesai",
+    "cancelled": "Dibatalkan",
+    "no_show": "Tidak Hadir"
+  },
+  "bookingStatus": {
+    "pending": "Tertunda",
+    "confirmed": "Terkonfirmasi",
+    "checked_in": "Check In",
+    "checked_out": "Check Out",
+    "cancelled": "Dibatalkan",
+    "no_show": "Tidak Hadir"
+  },
+  "common": {
+    "active": "Aktif",
+    "inactive": "Tidak Aktif",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "edit": "Edit",
+    "delete": "Hapus",
+    "add": "Tambah",
+    "view": "Lihat",
+    "search": "Cari",
+    "filter": "Filter",
+    "sort": "Urutkan",
+    "minutes": "menit",
+    "hour": "jam",
+    "hours": "jam"
+  }
+}

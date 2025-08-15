@@ -1,0 +1,106 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "vendors": "Vendors",
+    "users": "Users",
+    "transactions": "Transactions",
+    "services": "Services",
+    "products": "Products",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+  "actions": {
+    "approve": "Approve",
+    "reject": "Reject",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "view": "View",
+    "download": "Download",
+    "uploadFile": "Upload File",
+    "add": "Add"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "suspended": "Suspended"
+  },
+  "table": {
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "date": "Date",
+    "status": "Status",
+    "actions": "Actions",
+    "id": "ID",
+    "type": "Type",
+    "amount": "Amount",
+    "price": "Price",
+    "quantity": "Quantity",
+    "description": "Description",
+    "noData": "No data available",
+    "loading": "Loading data...",
+    "rowsPerPage": "Rows per page:",
+    "of": "of",
+    "page": "Page"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "signIn": "Sign In",
+    "resetPassword": "Reset Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "submit": "Submit",
+    "adminPortal": "Admin Portal"
+  },
+  "alerts": {
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Information"
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "passwordMismatch": "Passwords do not match",
+    "minLength": "Must be at least {{count}} characters",
+    "maxLength": "Cannot exceed {{count}} characters",
+    "serverError": "Server error occurred",
+    "accessDenied": "Access denied",
+    "networkError": "Network error, please try again"
+  },
+  "confirmations": {
+    "delete": "Are you sure you want to delete this item?",
+    "approve": "Are you sure you want to approve this item?",
+    "reject": "Are you sure you want to reject this item?",
+    "suspend": "Are you sure you want to suspend this account?"
+  },
+  "dateTime": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "thisWeek": "This Week",
+    "lastWeek": "Last Week",
+    "thisMonth": "This Month",
+    "lastMonth": "Last Month",
+    "custom": "Custom Range"
+  },
+  "language": {
+    "english": "English",
+    "japanese": "Japanese",
+    "indonesian": "Indonesian",
+    "changeLanguage": "Change Language"
+  }
+}

@@ -1,0 +1,196 @@
+{
+  "dashboard": {
+    "title": "Pet Services Dashboard",
+    "summary": "Dashboard Summary",
+    "metrics": {
+      "hotelRooms": "Hotel Rooms",
+      "activeBookings": "Active Bookings",
+      "checkedInPets": "Checked-in Pets",
+      "groomingServices": "Grooming Services",
+      "upcomingGroomings": "Upcoming Groomings",
+      "totalRevenue": "Total Revenue"
+    },
+    "tabs": {
+      "petHotel": "Pet Hotel",
+      "petGrooming": "Pet Grooming",
+      "analytics": "Analytics"
+    }
+  },
+  "hotelManagement": {
+    "title": "Pet Hotel Management",
+    "tabs": {
+      "rooms": "Rooms",
+      "bookings": "Bookings",
+      "availability": "Availability"
+    },
+    "rooms": {
+      "title": "Hotel Rooms",
+      "addRoom": "Add Room",
+      "noRooms": "No rooms have been added yet.",
+      "addRoomPrompt": "Click the Add Room button to create your first room.",
+      "form": {
+        "name": "Room Name",
+        "type": "Room Type",
+        "capacity": "Capacity",
+        "petType": "Pet Type",
+        "petSize": "Pet Size",
+        "price": "Price per Night",
+        "description": "Description",
+        "amenities": "Amenities",
+        "photos": "Photos"
+      },
+      "dialog": {
+        "title": "Add New Room",
+        "addPhotos": "Add Photos"
+      }
+    },
+    "bookings": {
+      "title": "Hotel Bookings",
+      "noBookings": "No bookings found",
+      "noBookingsDescription": "There are currently no pet hotel bookings.",
+      "id": "Booking ID",
+      "petName": "Pet Name",
+      "petType": "Pet Type",
+      "owner": "Owner",
+      "room": "Room",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "status": "Status",
+      "price": "Price",
+      "actions": "Actions",
+      "menu": {
+        "viewDetails": "View Details",
+        "updateStatus": "Update Status",
+        "checkIn": "Check In",
+        "checkOut": "Check Out",
+        "cancel": "Cancel Booking"
+      },
+      "statusDialog": {
+        "title": "Update Booking Status",
+        "bookingId": "Booking ID",
+        "petName": "Pet Name",
+        "room": "Room",
+        "currentStatus": "Current Status",
+        "newStatus": "New Status",
+        "notes": "Notes"
+      }
+    }
+  },
+  "groomingManagement": {
+    "title": "Pet Grooming Management",
+    "tabs": {
+      "services": "Services",
+      "appointments": "Appointments",
+      "schedule": "Schedule"
+    },
+    "services": {
+      "title": "Grooming Services",
+      "addService": "Add Service",
+      "noServices": "No grooming services have been added yet.",
+      "addServicePrompt": "Click the Add Service button to create your first grooming service.",
+      "form": {
+        "name": "Service Name",
+        "petType": "Pet Type",
+        "petSize": "Pet Size",
+        "duration": "Duration (minutes)",
+        "price": "Price",
+        "description": "Description",
+        "isActive": "Active"
+      },
+      "dialog": {
+        "title": "Add New Grooming Service",
+        "editTitle": "Edit Grooming Service"
+      }
+    }
+  },
+  "appointments": {
+    "title": "Grooming Appointments",
+    "noAppointments": "No appointments found",
+    "noAppointmentsDescription": "There are currently no pet grooming appointments.",
+    "id": "Appointment ID",
+    "petName": "Pet Name",
+    "service": "Service",
+    "date": "Date & Time",
+    "duration": "Duration",
+    "status": "Status",
+    "price": "Price",
+    "actions": "Actions",
+    "menu": {
+      "viewDetails": "View Details",
+      "updateStatus": "Update Status",
+      "markCompleted": "Mark as Completed",
+      "cancel": "Cancel Appointment",
+      "reschedule": "Reschedule"
+    },
+    "statusDialog": {
+      "title": "Update Appointment Status",
+      "appointmentId": "Appointment ID",
+      "petName": "Pet Name",
+      "service": "Service",
+      "currentStatus": "Current Status",
+      "newStatus": "New Status",
+      "notes": "Notes"
+    }
+  },
+  "analytics": {
+    "title": "Analytics Summary",
+    "revenue": "Revenue",
+    "periodSelector": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "occupancyRate": "Occupancy Rate",
+    "serviceDistribution": "Service Distribution",
+    "topServices": "Top Services"
+  },
+  "petTypes": {
+    "dog": "Dog",
+    "cat": "Cat",
+    "bird": "Bird",
+    "small_mammal": "Small Mammal",
+    "reptile": "Reptile",
+    "fish": "Fish",
+    "other": "Other"
+  },
+  "petSizes": {
+    "xsmall": "Extra Small",
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large",
+    "xlarge": "Extra Large"
+  },
+  "appointmentStatus": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "in_progress": "In Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "no_show": "No Show"
+  },
+  "bookingStatus": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "checked_in": "Checked In",
+    "checked_out": "Checked Out",
+    "cancelled": "Cancelled",
+    "no_show": "No Show"
+  },
+  "common": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "minutes": "min",
+    "hour": "hour",
+    "hours": "hours"
+  }
+}

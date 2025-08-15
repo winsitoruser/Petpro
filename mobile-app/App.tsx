@@ -11,6 +11,7 @@ import AuthNavigator from './src/navigation/AuthNavigator';
 import { store } from './src/store';
 import { useAuth } from './src/hooks/useAuth';
 import { ThemeProvider } from './src/context/ThemeContext';
+import { LanguageProvider } from './src/contexts/LanguageContext';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -60,11 +61,13 @@ export default function App() {
   return (
     <Provider store={store}>
       <ThemeProvider>
-        <SafeAreaProvider>
-          <NavigationContainer>
-            <AppContent />
-          </NavigationContainer>
-        </SafeAreaProvider>
+        <LanguageProvider>
+          <SafeAreaProvider>
+            <NavigationContainer>
+              <AppContent />
+            </NavigationContainer>
+          </SafeAreaProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </Provider>
   );

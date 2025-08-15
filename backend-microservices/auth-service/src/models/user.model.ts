@@ -1,6 +1,7 @@
 import { Table, Column, Model, DataType, BeforeCreate, BeforeUpdate, HasMany } from 'sequelize-typescript';
 import * as bcrypt from 'bcryptjs';
 import { RefreshToken } from './refresh-token.model';
+import { Pet } from './pet.model';
 
 @Table({ 
   tableName: 'users',
@@ -97,15 +98,18 @@ export class User extends Model<User> {
   @HasMany(() => RefreshToken)
   refreshTokens: RefreshToken[];
 
+  @HasMany(() => Pet)
+  pets: Pet[];
+
   @BeforeCreate
-  @BeforeUpdate
-  static async hashPassword(instance: User) {
-    // Only hash the password if it has been modified
-    if (instance.changed('password')) {
-      const salt = await bcrypt.genSalt(10);
-      instance.password = await bcrypt.hash(instance.password, salt);
-    }
+  static async hashPasswordCreate(instance: User) {
+    const salt = await bcrypt.genSalt(10);
+    instance.password = await bcrypt.hash(instance.password, salt);
   }
+  
+  // For password updates, we'll handle the hashing in the service layer
+  // before calling update on the model, rather than using BeforeUpdate hook
+  // This avoids issues with Sequelize's changed/previous/getDataValue typing
 
   // Method to compare password
   async comparePassword(candidatePassword: string): Promise<boolean> {

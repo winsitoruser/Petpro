@@ -1,0 +1,106 @@
+{
+  "navigation": {
+    "dashboard": "Dasbor",
+    "vendors": "Vendor",
+    "users": "Pengguna",
+    "transactions": "Transaksi",
+    "services": "Layanan",
+    "products": "Produk",
+    "reports": "Laporan",
+    "settings": "Pengaturan"
+  },
+  "actions": {
+    "approve": "Setujui",
+    "reject": "Tolak",
+    "edit": "Edit",
+    "delete": "Hapus",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "search": "Cari",
+    "filter": "Filter",
+    "export": "Ekspor",
+    "view": "Lihat",
+    "download": "Unduh",
+    "uploadFile": "Unggah File",
+    "add": "Tambah"
+  },
+  "status": {
+    "active": "Aktif",
+    "inactive": "Tidak Aktif",
+    "pending": "Tertunda",
+    "approved": "Disetujui",
+    "rejected": "Ditolak",
+    "suspended": "Ditangguhkan"
+  },
+  "table": {
+    "name": "Nama",
+    "email": "Email",
+    "phone": "Telepon",
+    "address": "Alamat",
+    "date": "Tanggal",
+    "status": "Status",
+    "actions": "Tindakan",
+    "id": "ID",
+    "type": "Tipe",
+    "amount": "Jumlah",
+    "price": "Harga",
+    "quantity": "Kuantitas",
+    "description": "Deskripsi",
+    "noData": "Tidak ada data tersedia",
+    "loading": "Memuat data...",
+    "rowsPerPage": "Baris per halaman:",
+    "of": "dari",
+    "page": "Halaman"
+  },
+  "auth": {
+    "login": "Masuk",
+    "logout": "Keluar",
+    "email": "Email",
+    "password": "Kata Sandi",
+    "forgotPassword": "Lupa Kata Sandi?",
+    "rememberMe": "Ingat Saya",
+    "signIn": "Masuk",
+    "resetPassword": "Atur Ulang Kata Sandi",
+    "newPassword": "Kata Sandi Baru",
+    "confirmPassword": "Konfirmasi Kata Sandi",
+    "submit": "Kirim",
+    "adminPortal": "Portal Admin"
+  },
+  "alerts": {
+    "success": "Berhasil",
+    "error": "Error",
+    "warning": "Peringatan",
+    "info": "Informasi"
+  },
+  "errors": {
+    "required": "Bidang ini wajib diisi",
+    "invalidEmail": "Alamat email tidak valid",
+    "passwordMismatch": "Kata sandi tidak cocok",
+    "minLength": "Minimal {{count}} karakter",
+    "maxLength": "Tidak boleh lebih dari {{count}} karakter",
+    "serverError": "Terjadi kesalahan server",
+    "accessDenied": "Akses ditolak",
+    "networkError": "Kesalahan jaringan, silakan coba lagi"
+  },
+  "confirmations": {
+    "delete": "Apakah Anda yakin ingin menghapus item ini?",
+    "approve": "Apakah Anda yakin ingin menyetujui item ini?",
+    "reject": "Apakah Anda yakin ingin menolak item ini?",
+    "suspend": "Apakah Anda yakin ingin menangguhkan akun ini?"
+  },
+  "dateTime": {
+    "today": "Hari Ini",
+    "yesterday": "Kemarin",
+    "thisWeek": "Minggu Ini",
+    "lastWeek": "Minggu Lalu",
+    "thisMonth": "Bulan Ini",
+    "lastMonth": "Bulan Lalu",
+    "custom": "Rentang Kustom"
+  },
+  "language": {
+    "english": "Inggris",
+    "japanese": "Jepang",
+    "indonesian": "Indonesia",
+    "changeLanguage": "Ganti Bahasa"
+  }
+}

@@ -148,6 +148,50 @@ PetPro is a comprehensive platform that connects pet owners with veterinary clin
 - Duration and price are required fields
 - Slots automatically unavailable when booked
 
+#### US-105: Pet Hotel Management
+
+**Story**: As a vendor, I want to manage my pet hotel services including rooms, bookings, and availability.
+
+**Acceptance Criteria**:
+- Room management with details (capacity, pet types/sizes, amenities, pricing)
+- Photo gallery for room features
+- Real-time availability tracking and dynamic pricing
+- Booking management with status workflow (pending, confirmed, checked-in, checked-out)
+- Daily reporting for pet monitoring during stays
+- Automated notifications for check-in/check-out reminders
+
+**Flow**:
+1. Vendor adds room inventory with details and photos
+2. Sets availability and pricing parameters
+3. Receives booking requests and manages status changes
+4. Records daily pet status for owner transparency
+
+**Edge Cases**:
+- Overlapping booking requests → prioritize first-come-first-served
+- Room maintenance → temporary unavailability setting
+
+#### US-106: Pet Grooming Services
+
+**Story**: As a vendor, I want to manage pet grooming services and appointments.
+
+**Acceptance Criteria**:
+- Service definition with pet type restrictions, duration, and pricing
+- Appointment scheduling with time slots
+- Staff assignment capability
+- Status workflow (pending, confirmed, in-progress, completed)
+- Support for service packages and add-ons
+
+**Flow**:
+1. Vendor defines grooming services and pricing
+2. Sets availability for appointments
+3. Manages incoming appointment requests
+4. Updates status through the grooming process
+5. Records completion and outcomes
+
+**Edge Cases**:
+- Service taking longer than expected → buffer time between appointments
+- Specific breed requirements → custom pricing options
+
 #### US-103: Product Management
 
 **Story**: As a vendor, I want to manage inventory and product pricing.

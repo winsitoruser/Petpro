@@ -6,6 +6,8 @@ import { UserModule } from './modules/user/user.module';
 import { HealthModule } from './modules/health/health.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { EventsModule } from './events/events.module';
+import { PetModule } from './modules/pet/pet.module';
+import { PetHealthModule } from './modules/pet-health/pet-health.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { EventsModule } from './events/events.module';
     // Feature modules
     AuthModule,
     UserModule,
+    PetModule,
+    PetHealthModule,
   ],
 })
 export class AppModule {}

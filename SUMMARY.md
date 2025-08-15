@@ -31,9 +31,16 @@
 
 ## API Documentation
 * [API Endpoints](docs/api/api-endpoints.md)
+* [Booking Service API](docs/api/booking-service-api.md)
+* [Inventory Service API](docs/api/inventory-service-api.md)
 
 ## Architecture
 * [Detailed ERD Domains](docs/architecture/detailed-erd-domains.md)
+* [Pet Services Architecture](docs/architecture/pet-services-architecture.md)
+
+### Entity Relationship Diagrams
+* [Microservices Domain ERD](docs/architecture/detailed-erd/microservices-domain-erd.md)
+* [Vendor Service ERD](docs/architecture/detailed-erd/vendor-service-erd.md)
 
 ### Sequence Diagrams
 * [Vendor Registration Flow](docs/architecture/detailed-sequence-diagrams/vendor-registration-flow.md)

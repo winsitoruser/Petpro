@@ -1,0 +1,106 @@
+{
+  "navigation": {
+    "dashboard": "ダッシュボード",
+    "vendors": "ベンダー",
+    "users": "ユーザー",
+    "transactions": "取引",
+    "services": "サービス",
+    "products": "製品",
+    "reports": "レポート",
+    "settings": "設定"
+  },
+  "actions": {
+    "approve": "承認",
+    "reject": "拒否",
+    "edit": "編集",
+    "delete": "削除",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "search": "検索",
+    "filter": "フィルター",
+    "export": "エクスポート",
+    "view": "表示",
+    "download": "ダウンロード",
+    "uploadFile": "ファイルをアップロード",
+    "add": "追加"
+  },
+  "status": {
+    "active": "アクティブ",
+    "inactive": "非アクティブ",
+    "pending": "保留中",
+    "approved": "承認済み",
+    "rejected": "拒否",
+    "suspended": "一時停止"
+  },
+  "table": {
+    "name": "名前",
+    "email": "メール",
+    "phone": "電話番号",
+    "address": "住所",
+    "date": "日付",
+    "status": "状態",
+    "actions": "アクション",
+    "id": "ID",
+    "type": "タイプ",
+    "amount": "金額",
+    "price": "価格",
+    "quantity": "数量",
+    "description": "説明",
+    "noData": "データがありません",
+    "loading": "データを読み込み中...",
+    "rowsPerPage": "ページあたりの行数:",
+    "of": "/",
+    "page": "ページ"
+  },
+  "auth": {
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "rememberMe": "ログイン状態を保持",
+    "signIn": "サインイン",
+    "resetPassword": "パスワードをリセット",
+    "newPassword": "新しいパスワード",
+    "confirmPassword": "パスワードを確認",
+    "submit": "送信",
+    "adminPortal": "管理者ポータル"
+  },
+  "alerts": {
+    "success": "成功",
+    "error": "エラー",
+    "warning": "警告",
+    "info": "情報"
+  },
+  "errors": {
+    "required": "この項目は必須です",
+    "invalidEmail": "無効なメールアドレス",
+    "passwordMismatch": "パスワードが一致しません",
+    "minLength": "少なくとも{{count}}文字が必要です",
+    "maxLength": "{{count}}文字を超えることはできません",
+    "serverError": "サーバーエラーが発生しました",
+    "accessDenied": "アクセスが拒否されました",
+    "networkError": "ネットワークエラー、もう一度お試しください"
+  },
+  "confirmations": {
+    "delete": "このアイテムを削除してもよろしいですか？",
+    "approve": "このアイテムを承認してもよろしいですか？",
+    "reject": "このアイテムを拒否してもよろしいですか？",
+    "suspend": "このアカウントを一時停止してもよろしいですか？"
+  },
+  "dateTime": {
+    "today": "今日",
+    "yesterday": "昨日",
+    "thisWeek": "今週",
+    "lastWeek": "先週",
+    "thisMonth": "今月",
+    "lastMonth": "先月",
+    "custom": "カスタム範囲"
+  },
+  "language": {
+    "english": "英語",
+    "japanese": "日本語",
+    "indonesian": "インドネシア語",
+    "changeLanguage": "言語を変更"
+  }
+}
