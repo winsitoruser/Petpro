@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException, Logger, forwardRef, Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { Booking, BookingStatus } from '../../models/booking.model';
@@ -8,6 +8,7 @@ import { Service } from '../../models/service.model';
 import { Pet } from '../../models/pet.model';
 import { ServiceAvailability } from '../../models/service-availability.model';
 import { KafkaProducerService } from '../events/kafka/kafka-producer.service';
+import { BookingEventsGateway } from '../events/booking-events.gateway';
 
 @Injectable()
 export class BookingService {
@@ -23,6 +24,8 @@ export class BookingService {
     @InjectModel(ServiceAvailability)
     private readonly serviceAvailabilityModel: typeof ServiceAvailability,
     private readonly kafkaProducer: KafkaProducerService,
+    @Inject(forwardRef(() => BookingEventsGateway))
+    private readonly bookingEventsGateway: BookingEventsGateway,
   ) {}
 
   async create(createBookingDto: CreateBookingDto): Promise<Booking> {
@@ -82,6 +85,23 @@ export class BookingService {
         start_time: booking.startTime,
         end_time: booking.endTime,
         status: booking.status,
+      });
+      
+      // Emit real-time event via WebSockets
+      this.bookingEventsGateway.emitBookingStatusUpdate({
+        bookingId: booking.id,
+        status: booking.status,
+        updatedAt: new Date(),
+        message: 'Booking created successfully',
+      });
+      
+      // Send notification to customer
+      this.bookingEventsGateway.sendNotificationToUser(booking.customerId, {
+        type: 'BOOKING_CREATED',
+        bookingId: booking.id,
+        title: 'New Booking',
+        message: `Your booking (Ref: ${booking.bookingReference}) has been created successfully`,
+        createdAt: new Date(),
       });
 
       return booking;
@@ -275,6 +295,34 @@ export class BookingService {
         end_time: booking.endTime,
         status: booking.status,
       });
+      
+      // Emit real-time event via WebSockets
+      this.bookingEventsGateway.emitBookingStatusUpdate({
+        bookingId: booking.id,
+        status: booking.status,
+        updatedAt: new Date(),
+        message: 'Booking has been updated',
+      });
+      
+      // Send notification to customer about the update
+      this.bookingEventsGateway.sendNotificationToUser(booking.customerId, {
+        type: 'BOOKING_UPDATED',
+        bookingId: booking.id,
+        title: 'Booking Updated',
+        message: `Your booking (Ref: ${booking.bookingReference}) has been updated`,
+        createdAt: new Date(),
+      });
+      
+      // Notify service provider about the update if it exists
+      if (booking.service?.providerId) {
+        this.bookingEventsGateway.sendNotificationToUser(booking.service.providerId, {
+          type: 'BOOKING_UPDATED',
+          bookingId: booking.id,
+          title: 'Booking Updated',
+          message: `A booking (Ref: ${booking.bookingReference}) has been updated`,
+          createdAt: new Date(),
+        });
+      }
 
       // Reload booking with associations
       return this.findById(id);
@@ -304,6 +352,34 @@ export class BookingService {
         status: BookingStatus.CANCELLED,
       });
       
+      // Emit real-time event via WebSockets
+      this.bookingEventsGateway.emitBookingStatusUpdate({
+        bookingId: booking.id,
+        status: BookingStatus.CANCELLED,
+        updatedAt: new Date(),
+        message: 'Booking has been cancelled',
+      });
+      
+      // Send notification to both customer and provider
+      this.bookingEventsGateway.sendNotificationToUser(booking.customerId, {
+        type: 'BOOKING_CANCELLED',
+        bookingId: booking.id,
+        title: 'Booking Cancelled',
+        message: `Your booking (Ref: ${booking.bookingReference}) has been cancelled`,
+        createdAt: new Date(),
+      });
+      
+      // Notify service provider about the cancellation if it exists
+      if (booking.service?.providerId) {
+        this.bookingEventsGateway.sendNotificationToUser(booking.service.providerId, {
+          type: 'BOOKING_CANCELLED',
+          bookingId: booking.id,
+          title: 'Booking Cancelled',
+          message: `A booking (Ref: ${booking.bookingReference}) has been cancelled`,
+          createdAt: new Date(),
+        });
+      }
+      
       return true;
     } catch (error) {
       this.logger.error(`Failed to cancel booking ${id}: ${error.message}`);
@@ -331,6 +407,23 @@ export class BookingService {
         status: BookingStatus.CONFIRMED,
         start_time: booking.startTime,
         end_time: booking.endTime,
+      });
+      
+      // Emit real-time event via WebSockets
+      this.bookingEventsGateway.emitBookingStatusUpdate({
+        bookingId: booking.id,
+        status: BookingStatus.CONFIRMED,
+        updatedAt: new Date(),
+        message: 'Booking has been confirmed',
+      });
+      
+      // Send notification to customer
+      this.bookingEventsGateway.sendNotificationToUser(booking.customerId, {
+        type: 'BOOKING_CONFIRMED',
+        bookingId: booking.id,
+        title: 'Booking Confirmed',
+        message: `Your booking (Ref: ${booking.bookingReference}) has been confirmed`,
+        createdAt: new Date(),
       });
       
       return this.findById(id);
@@ -406,6 +499,15 @@ export class BookingService {
       
       // In a real implementation, we would integrate with a notification service
       // to send an email or SMS reminder to the customer
+      
+      // Send real-time notification to customer
+      this.bookingEventsGateway.sendNotificationToUser(booking.customerId, {
+        type: 'BOOKING_REMINDER',
+        bookingId: booking.id,
+        title: 'Booking Reminder',
+        message: `Reminder: You have a booking (Ref: ${booking.bookingReference}) scheduled for ${booking.startTime.toLocaleString()}`,
+        createdAt: new Date(),
+      });
       
       return true;
     } catch (error) {
