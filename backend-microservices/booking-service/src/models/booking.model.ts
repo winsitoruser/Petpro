@@ -157,6 +157,14 @@ export class Booking extends Model {
     comment: 'When the reminder was last sent',
   })
   reminderSentAt: Date;
+  
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+    comment: 'Whether the customer has left a review for this booking',
+  })
+  reviewed: boolean;
 
   @CreatedAt
   createdAt: Date;

@@ -1,0 +1,108 @@
+name: SSH Deployment
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+        description: 'Environment to deploy to (development, staging, production)'
+      target_host:
+        required: true
+        type: string
+        description: 'SSH target host to deploy to'
+    secrets:
+      SSH_PRIVATE_KEY:
+        required: true
+      SSH_USER:
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy via SSH to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      
+      - name: Setup known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ inputs.target_host }} >> ~/.ssh/known_hosts
+      
+      - name: Deploy with rsync
+        run: |
+          rsync -avz --delete \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'node_modules/' \
+            --exclude '.ssh/' \
+            ./ ${{ secrets.SSH_USER }}@${{ inputs.target_host }}:/var/www/petpro/
+      
+      - name: Execute remote deployment commands
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ inputs.target_host }} << 'EOF'
+            cd /var/www/petpro
+            
+            # Load environment variables
+            source .env.${{ inputs.environment }}
+            
+            # Install dependencies
+            npm ci
+            
+            # Run database migrations
+            npm run migrate
+            
+            # Restart services
+            pm2 reload ecosystem.config.js --env ${{ inputs.environment }}
+            
+            # Clear cache if needed
+            npm run cache:clear
+            
+            echo "Deployment completed successfully!"
+          EOF
+      
+      - name: Send deployment notification
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "✅ Successfully deployed to ${{ inputs.environment }} environment via SSH.",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "✅ SSH Deployment Successful"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Environment:*\n${{ inputs.environment }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Deployed by:*\n${{ github.actor }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Commit:*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL || '' }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

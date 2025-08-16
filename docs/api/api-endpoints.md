@@ -62,6 +62,20 @@ This document defines the API endpoints for the MVP of the PetPro platform, orga
 | PUT | `/bookings/:id/status` | Update booking status (vendor) |
 | DELETE | `/bookings/:id` | Cancel booking |
 
+### Review Service
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/reviews` | Create a new review |
+| PUT | `/reviews/:id` | Update an existing review |
+| DELETE | `/reviews/:id` | Delete a review |
+| GET | `/reviews/vendor/:vendorId` | Get vendor reviews with filtering and sorting |
+| GET | `/reviews/vendor/:vendorId/summary` | Get vendor review statistics |
+| POST | `/reviews/:id/helpful` | Toggle marking a review as helpful |
+| GET | `/reviews/my-reviews` | Get authenticated customer's reviews |
+| GET | `/reviews/:id` | Get a specific review by ID |
+| GET | `/reviews/booking/:bookingId` | Get reviews for a specific booking |
+
 ## Product & Order Management
 
 ### Product Service
@@ -122,6 +136,25 @@ This document defines the API endpoints for the MVP of the PetPro platform, orga
 | GET | `/admin/reports/sales` | Sales report |
 | GET | `/admin/reports/bookings` | Bookings report |
 | PUT | `/admin/settings/commissions` | Update commission settings |
+
+### Analytics Service
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/analytics/customer-growth` | Get customer growth statistics by time interval |
+| GET | `/analytics/customer-activity` | Get customer activity metrics by type and time period |
+| GET | `/analytics/customer-demographics` | Get customer demographic insights |
+| GET | `/analytics/service-usage` | Get service usage metrics and statistics |
+| GET | `/analytics/customer-retention` | Get customer retention metrics and churn rates |
+
+### Activities Service
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/activities` | Create activity record (admin/system only) |
+| GET | `/activities/user/:userId` | Get activities by user ID |
+| GET | `/activities/recent` | Get recent activities across users (admin only) |
+| GET | `/activities/statistics` | Get activity statistics grouped by time interval |
 
 ## Common API Response Format
 
