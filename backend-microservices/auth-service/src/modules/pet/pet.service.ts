@@ -15,10 +15,17 @@ export class PetService {
    * Create a new pet record for a user
    */
   async create(userId: string, createPetDto: CreatePetDto): Promise<Pet> {
-    const pet = await this.petModel.create({
+    const petData: any = {
       ...createPetDto,
       userId,
-    });
+    };
+
+    // Convert birthDate string to Date if provided
+    if (createPetDto.birthDate) {
+      petData.birthDate = new Date(createPetDto.birthDate);
+    }
+
+    const pet = await this.petModel.create(petData);
 
     return pet;
   }
@@ -69,7 +76,14 @@ export class PetService {
   async update(id: string, userId: string, updatePetDto: UpdatePetDto): Promise<Pet> {
     const pet = await this.verifyPetOwnership(id, userId);
     
-    await pet.update(updatePetDto);
+    const updateData: any = { ...updatePetDto };
+    
+    // Convert birthDate string to Date if provided
+    if (updatePetDto.birthDate) {
+      updateData.birthDate = new Date(updatePetDto.birthDate as string);
+    }
+    
+    await pet.update(updateData);
     return pet;
   }
 

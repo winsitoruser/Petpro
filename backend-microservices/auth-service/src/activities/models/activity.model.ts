@@ -1,5 +1,5 @@
 import { Column, Model, Table, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { User } from '../../users/models/user.model';
+import { User } from '../../models/user.model';
 import { ActivityType } from '../enums/activity-type.enum';
 
 @Table({

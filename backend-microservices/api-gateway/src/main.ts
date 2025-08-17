@@ -22,7 +22,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   
   // Apply global middleware
-  app.use(helmet());
+  app.use(helmet.default());
   app.use(cookieParser());
   
   // Enable CORS

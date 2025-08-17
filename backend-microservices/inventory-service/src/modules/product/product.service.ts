@@ -109,7 +109,11 @@ export class ProductService {
           { sku: { [Op.iLike]: `%${query}%` } },
           { barcode: { [Op.iLike]: `%${query}%` } },
           { brand: { [Op.iLike]: `%${query}%` } },
-          Sequelize.fn('ARRAY_TO_STRING', Sequelize.col('tags'), ',', '') + ' ' + query
+          Sequelize.where(
+            Sequelize.fn('ARRAY_TO_STRING', Sequelize.col('tags'), ','),
+            Op.iLike,
+            `%${query}%`
+          )
         ]
       },
       include: [

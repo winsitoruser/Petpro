@@ -5,6 +5,7 @@ import { VendorService } from './vendor-service.model';
 
 export enum VendorStatus {
   PENDING = 'pending',
+  PENDING_APPROVAL = 'pending_approval',
   ACTIVE = 'active',
   INACTIVE = 'inactive',
   SUSPENDED = 'suspended'

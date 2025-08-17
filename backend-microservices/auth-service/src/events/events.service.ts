@@ -78,6 +78,30 @@ export class EventsService implements OnModuleInit {
   }
 
   /**
+   * Publish a user updated event
+   * @param userData Updated user data
+   */
+  async publishUserUpdated(userData: any): Promise<void> {
+    try {
+      const { password, ...userDataWithoutPassword } = userData;
+      
+      await this.kafkaClient.emit('user.updated', {
+        id: userDataWithoutPassword.id,
+        email: userDataWithoutPassword.email,
+        firstName: userDataWithoutPassword.firstName,
+        lastName: userDataWithoutPassword.lastName,
+        role: userDataWithoutPassword.role,
+        updatedAt: new Date().toISOString(),
+        eventId: this.generateEventId(),
+      });
+      
+      this.logger.log(`Published user.updated event for user: ${userData.id}`, 'EventsService');
+    } catch (error) {
+      this.logger.error('Failed to publish user.updated event', error, 'EventsService');
+    }
+  }
+
+  /**
    * Publish a password reset requested event
    * @param userId User ID
    */

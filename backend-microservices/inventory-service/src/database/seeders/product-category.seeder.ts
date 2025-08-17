@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { ProductCategory } from '../../modules/product-category/models/product-category.model';
+import { ProductCategory } from '../../models/product-category.model';
 
 @Injectable()
 export class ProductCategorySeeder {

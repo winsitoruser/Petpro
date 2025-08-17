@@ -12,14 +12,15 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ActivitiesService } from './activities.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { Activity } from './models/activity.model';
 import { ActivityType } from './enums/activity-type.enum';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../modules/auth/guards/roles.guard';
+import { Roles } from '../modules/auth/decorators/roles.decorator';
 
 @ApiTags('activities')
 @Controller('activities')
@@ -34,7 +35,7 @@ export class ActivitiesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new activity record (admin/system only)' })
   @ApiResponse({ status: 201, description: 'Activity record created successfully' })
-  async create(@Body() createActivityDto: CreateActivityDto, @Req() req): Promise<Activity> {
+  async create(@Body() createActivityDto: CreateActivityDto, @Req() req: Request): Promise<Activity> {
     this.logger.log(`Creating activity: ${createActivityDto.type} for user ${createActivityDto.userId}`);
     
     // Add IP and user agent if not provided
@@ -64,10 +65,10 @@ export class ActivitiesController {
     @Param('userId', ParseUUIDPipe) userId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
+    @Req() req: Request,
     @Query('types') types?: ActivityType[],
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Req() req,
   ): Promise<{ activities: Activity[]; total: number }> {
     this.logger.log(`Getting activities for user: ${userId}`);
     

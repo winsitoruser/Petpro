@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { InjectModel } from '@nestjs/sequelize';
-import { User } from '../users/models/user.model';
-import { UserAddress } from '../users/models/user-address.model';
-import { Pet } from '../pets/models/pet.model';
+import { User } from '../models/user.model';
+import { UserAddress } from '../models/user-address.model';
+import { Pet } from '../models/pet.model';
 import { ActivitiesService } from '../activities/activities.service';
 import { ActivityType } from '../activities/enums/activity-type.enum';
 

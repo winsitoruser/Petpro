@@ -4,9 +4,9 @@ import { HttpModule } from '@nestjs/axios';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { CustomerIntegrationService } from './customer-integration.service';
 import { CustomerIntegrationController } from './customer-integration.controller';
-import { User } from '../users/models/user.model';
-import { UserAddress } from '../users/models/user-address.model';
-import { Pet } from '../pets/models/pet.model';
+import { User } from '../models/user.model';
+import { UserAddress } from '../models/user-address.model';
+import { Pet } from '../models/pet.model';
 import { ActivitiesModule } from '../activities/activities.module';
 
 @Module({

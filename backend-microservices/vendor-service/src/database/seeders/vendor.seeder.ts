@@ -39,7 +39,7 @@ export class VendorSeeder {
           latitude: 34.052235,
           longitude: -118.243683,
           logoUrl: 'https://storage.petpro.com/vendors/pawsandclaws-logo.png',
-          businessHours: JSON.stringify({
+          businessHours: {
             monday: { open: '08:00', close: '18:00' },
             tuesday: { open: '08:00', close: '18:00' },
             wednesday: { open: '08:00', close: '18:00' },
@@ -68,7 +68,7 @@ export class VendorSeeder {
           latitude: 40.712776,
           longitude: -74.005974,
           logoUrl: 'https://storage.petpro.com/vendors/happytails-logo.png',
-          businessHours: JSON.stringify({
+          businessHours: {
             monday: { open: '09:00', close: '19:00' },
             tuesday: { open: '09:00', close: '19:00' },
             wednesday: { open: '09:00', close: '19:00' },
@@ -97,7 +97,7 @@ export class VendorSeeder {
           latitude: 32.776665,
           longitude: -96.796989,
           logoUrl: 'https://storage.petpro.com/vendors/vetonthego-logo.png',
-          businessHours: JSON.stringify({
+          businessHours: {
             monday: { open: '08:00', close: '20:00' },
             tuesday: { open: '08:00', close: '20:00' },
             wednesday: { open: '08:00', close: '20:00' },
@@ -126,7 +126,7 @@ export class VendorSeeder {
           latitude: 25.761681,
           longitude: -80.191788,
           logoUrl: 'https://storage.petpro.com/vendors/pettrainingacademy-logo.png',
-          businessHours: JSON.stringify({
+          businessHours: {
             monday: { open: '10:00', close: '18:00' },
             tuesday: { open: '10:00', close: '18:00' },
             wednesday: { open: '10:00', close: '18:00' },

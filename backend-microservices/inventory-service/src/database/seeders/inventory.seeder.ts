@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Inventory } from '../../modules/inventory/models/inventory.model';
-import { Product } from '../../modules/product/models/product.model';
+import { Inventory } from '../../models/inventory.model';
+import { Product } from '../../models/product.model';
 
 @Injectable()
 export class InventorySeeder {

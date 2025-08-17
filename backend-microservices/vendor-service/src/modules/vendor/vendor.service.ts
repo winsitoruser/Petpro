@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Sequelize } from 'sequelize-typescript';
+import { Sequelize, Op } from 'sequelize';
 import { Vendor, VendorStatus } from '../../models/vendor.model';
 import { VendorService as VendorServiceModel } from '../../models/vendor-service.model';
 import { CreateVendorDto } from './dto/create-vendor.dto';
@@ -209,16 +209,16 @@ export class VendorService {
     // Handle search query (business name, description)
     if (query) {
       whereClause['businessName'] = {
-        [Sequelize.Op.iLike]: `%${query}%`,
+        [Op.iLike]: `%${query}%`,
       };
     }
     
     // Handle location (city, state, postalCode)
     if (location) {
-      whereClause[Sequelize.Op.or] = [
-        { city: { [Sequelize.Op.iLike]: `%${location}%` } },
-        { state: { [Sequelize.Op.iLike]: `%${location}%` } },
-        { postalCode: { [Sequelize.Op.iLike]: `%${location}%` } },
+      whereClause[Op.or] = [
+        { city: { [Op.iLike]: `%${location}%` } },
+        { state: { [Op.iLike]: `%${location}%` } },
+        { postalCode: { [Op.iLike]: `%${location}%` } },
       ];
     }
 
