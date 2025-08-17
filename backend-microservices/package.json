@@ -1,0 +1,37 @@
+{
+  "name": "petpro-backend-microservices",
+  "version": "1.0.0",
+  "description": "PetPro Backend Microservices with Kafka Communication",
+  "author": "PetPro Team",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "install:all": "cd admin-service && npm install && cd ../admin-gateway && npm install && cd ../auth-service && npm install && cd ../api-gateway && npm install && cd ../booking-service && npm install && cd ../inventory-service && npm install && cd ../vendor-service && npm install",
+    "dev:all": "concurrently \"cd admin-service && npm run start:dev\" \"cd admin-gateway && npm run start:dev\" \"cd auth-service && npm run start:dev\" \"cd api-gateway && npm run start:dev\" \"cd booking-service && npm run start:dev\" \"cd inventory-service && npm run start:dev\" \"cd vendor-service && npm run start:dev\"",
+    "build:all": "cd admin-service && npm run build && cd ../admin-gateway && npm run build && cd ../auth-service && npm run build && cd ../api-gateway && npm run build && cd ../booking-service && npm run build && cd ../inventory-service && npm run build && cd ../vendor-service && npm run build",
+    "start:all": "concurrently \"cd admin-service && npm run start\" \"cd admin-gateway && npm run start\" \"cd auth-service && npm run start\" \"cd api-gateway && npm run start\" \"cd booking-service && npm run start\" \"cd inventory-service && npm run start\" \"cd vendor-service && npm run start\"",
+    "db:migrate:all": "cd admin-service && npm run db:migrate && cd ../auth-service && npm run db:migrate && cd ../booking-service && npm run db:migrate",
+    "db:seed:all": "cd admin-service && npm run db:seed && cd ../auth-service && npm run db:seed && cd ../booking-service && npm run db:seed && cd ../inventory-service && npm run seed",
+    "db:reset:all": "cd admin-service && npm run db:migrate:undo && npm run db:migrate && npm run db:seed && cd ../auth-service && npm run db:migrate:undo && npm run db:migrate && npm run db:seed && cd ../booking-service && npm run db:migrate:undo && npm run db:migrate && npm run db:seed",
+    "lint:all": "cd admin-service && npm run lint && cd ../admin-gateway && npm run lint && cd ../auth-service && npm run lint && cd ../api-gateway && npm run lint && cd ../booking-service && npm run lint && cd ../inventory-service && npm run lint && cd ../vendor-service && npm run lint",
+    "test:all": "cd admin-service && npm run test && cd ../admin-gateway && npm run test && cd ../auth-service && npm run test && cd ../api-gateway && npm run test && cd ../booking-service && npm run test && cd ../inventory-service && npm run test && cd ../vendor-service && npm run test",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:reset": "docker-compose down -v && docker-compose build --no-cache && docker-compose up -d",
+    "docker:logs": "docker-compose logs -f",
+    "docker:infra": "docker-compose up -d postgres kafka redis",
+    "health:check": "curl -f http://localhost:3004/health && curl -f http://localhost:3005/health && curl -f http://localhost:3000/health && curl -f http://localhost:3001/health && curl -f http://localhost:3002/health && curl -f http://localhost:3003/health && curl -f http://localhost:3006/health"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "keywords": [
+    "microservices",
+    "nestjs",
+    "kafka",
+    "postgresql",
+    "docker",
+    "pet-care",
+    "admin-dashboard"
+  ]
+}
