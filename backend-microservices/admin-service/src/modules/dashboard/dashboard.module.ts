@@ -10,5 +10,6 @@ import { SystemLog } from '../../models/system-log.model';
   imports: [SequelizeModule.forFeature([AdminUser, UserSession, SystemLog])],
   controllers: [DashboardController],
   providers: [DashboardService],
+  exports: [DashboardService]
 })
 export class DashboardModule {}

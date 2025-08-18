@@ -8,7 +8,7 @@ import { SystemLog } from '../../models/system-log.model';
 @Module({
   imports: [
     SequelizeModule.forRootAsync({
-      imports: [ConfigModule],
+      imports: [ConfigModule], 
       useFactory: (configService: ConfigService) => ({
         dialect: 'postgres',
         host: configService.get('DB_HOST') || 'localhost',
