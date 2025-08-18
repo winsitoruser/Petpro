@@ -18,7 +18,7 @@ import { SystemLog } from '../../models/system-log.model';
         database: configService.get('DB_DATABASE') || 'petpro_admin_dev',
         models: [AdminUser, UserSession, SystemLog],
         autoLoadModels: true,
-        synchronize: false,
+        synchronize: true,
         logging: false,
       }),
       inject: [ConfigService],
