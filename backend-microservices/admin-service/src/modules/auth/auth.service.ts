@@ -39,7 +39,7 @@ export class AuthService {
 
     const payload = { email: user.email, sub: user.id, role: user.role };
     const token = this.jwtService.sign(payload);
-
+    
     await this.userSessionModel.create({
       userId: user.id,
       token,
@@ -47,7 +47,7 @@ export class AuthService {
       ipAddress,
       userAgent,
     });
-
+    
     await user.update({
       lastLoginAt: new Date(),
       lastLoginIp: ipAddress,
@@ -61,6 +61,8 @@ export class AuthService {
       ipAddress,
       userAgent,
     });
+
+    
 
     return {
       access_token: token,

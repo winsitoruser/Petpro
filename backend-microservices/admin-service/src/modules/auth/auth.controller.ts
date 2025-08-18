@@ -18,7 +18,6 @@ export class AuthController {
   async login(@Body() loginDto: LoginDto, @Request() req: any) {
     const ipAddress = req.ip || req.connection.remoteAddress;
     const userAgent = req.get('User-Agent');
-    
     return this.authService.login(loginDto, ipAddress, userAgent);
   }
 

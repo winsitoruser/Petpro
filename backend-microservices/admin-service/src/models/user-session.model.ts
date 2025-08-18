@@ -30,7 +30,7 @@ export class UserSession extends Model<UserSession> {
   userId: string;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.TEXT,
     allowNull: false,
   })
   token: string;
@@ -48,10 +48,10 @@ export class UserSession extends Model<UserSession> {
   ipAddress: string;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.TEXT,
     allowNull: true,
   })
-  userAgent: string;
+  userAgent: string; 
 
   @Column({
     type: DataType.BOOLEAN,
