@@ -1,0 +1,28 @@
+# Environment
+NODE_ENV=development
+
+# Server Configuration
+PORT=3004
+
+# JWT Configuration
+JWT_SECRET=admin_jwt_secret_key_change_in_production
+JWT_EXPIRATION=86400
+
+# Kafka Configuration
+KAFKA_BROKERS=localhost:9092
+
+# Service URLs (for reference)
+ADMIN_SERVICE_URL=http://admin-service:3005
+AUTH_SERVICE_URL=http://auth-service:3001
+BOOKING_SERVICE_URL=http://booking-service:3002
+INVENTORY_SERVICE_URL=http://inventory-service:3003
+VENDOR_SERVICE_URL=http://vendor-service:3006
+
+# Frontend Configuration
+ADMIN_FRONTEND_URL=http://localhost:3010
+
+# CORS
+CORS_ORIGIN=http://localhost:3010
+
+# Logging
+LOG_LEVEL=debug

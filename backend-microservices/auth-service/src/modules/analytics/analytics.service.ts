@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Sequelize } from 'sequelize-typescript';
 import { User } from '../users/models/user.model';
 import { Activity } from '../activities/models/activity.model';
 import { Pet } from '../pets/models/pet.model';
-import { Op } from 'sequelize';
+import { Op, QueryTypes } from 'sequelize';
 
 @Injectable()
 export class AnalyticsService {
@@ -15,8 +14,11 @@ export class AnalyticsService {
     private activityModel: typeof Activity,
     @InjectModel(Pet)
     private petModel: typeof Pet,
-    private sequelize: Sequelize,
   ) {}
+
+  private get sequelize() {
+    return this.userModel.sequelize;
+  }
 
   /**
    * Get customer growth analytics (new customers per period)
@@ -179,7 +181,7 @@ export class AnalyticsService {
           [Op.between]: [startDate, endDate],
         },
       },
-      group: [this.sequelize.literal('service_type')],
+      group: [this.sequelize.literal('service_type') as any],
       raw: true,
     });
 
@@ -251,7 +253,7 @@ export class AnalyticsService {
       ORDER BY 
         booking_count DESC
       LIMIT 50
-    `, { type: this.sequelize.QueryTypes.SELECT });
+    `, { type: QueryTypes.SELECT });
 
     // Get customer retention rate by calculating customers who made bookings in consecutive months
     const retentionByMonth = await this.sequelize.query(`
@@ -299,7 +301,7 @@ export class AnalyticsService {
       ORDER BY
         month DESC
       LIMIT 12
-    `, { type: this.sequelize.QueryTypes.SELECT });
+    `, { type: QueryTypes.SELECT });
 
     return {
       customersWithMultipleBookings,

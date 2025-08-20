@@ -95,6 +95,65 @@ export class User extends Model<User> {
   })
   lastLogin: Date;
 
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  externalId: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  phoneNumber: string;
+
+  @Column({
+    type: DataType.DATE,
+    allowNull: true,
+  })
+  dateOfBirth: Date;
+
+  @Column({
+    type: DataType.ENUM('male', 'female', 'other'),
+    allowNull: true,
+  })
+  gender: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  avatarUrl: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  profileImage: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  preferredLanguage: string;
+
+  @Column({
+    type: DataType.JSONB,
+    allowNull: true,
+  })
+  metaData: any;
+
+  @Column({
+    type: DataType.JSONB,
+    allowNull: true,
+  })
+  addresses: any[];
+
+  // Virtual property for fullName
+  get fullName(): string {
+    return `${this.firstName} ${this.lastName}`;
+  }
+
   @HasMany(() => RefreshToken)
   refreshTokens: RefreshToken[];
 

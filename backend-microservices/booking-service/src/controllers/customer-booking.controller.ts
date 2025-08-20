@@ -1,3 +1,4 @@
+/// <reference path="../types/express.d.ts" />
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { validationResult } from 'express-validator';
@@ -10,7 +11,7 @@ import i18n from '../i18n';
  */
 export const getBookings = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = (req.user as any)?.id;
     if (!userId) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: i18n.__('auth.unauthorized') });
       return;
@@ -29,7 +30,7 @@ export const getBookings = async (req: Request, res: Response): Promise<void> =>
     const bookings = await customerBookingService.getCustomerBookings(userId, filterOptions);
     res.status(StatusCodes.OK).json(bookings);
   } catch (error) {
-    logger.error('Error getting customer bookings', { error, userId: req.user?.id });
+    logger.error('Error getting customer bookings', { error, userId: (req.user as any)?.id });
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: i18n.__('common.serverError') });
   }
 };
@@ -39,7 +40,7 @@ export const getBookings = async (req: Request, res: Response): Promise<void> =>
  */
 export const getBookingById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = (req.user as any)?.id;
     if (!userId) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: i18n.__('auth.unauthorized') });
       return;
@@ -55,7 +56,7 @@ export const getBookingById = async (req: Request, res: Response): Promise<void>
 
     res.status(StatusCodes.OK).json(booking);
   } catch (error) {
-    logger.error('Error getting booking by ID', { error, userId: req.user?.id, bookingId: req.params.id });
+    logger.error('Error getting booking by ID', { error, userId: (req.user as any)?.id, bookingId: req.params.id });
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: i18n.__('common.serverError') });
   }
 };
@@ -71,7 +72,7 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    const userId = req.user?.id;
+    const userId = (req.user as any)?.id;
     if (!userId) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: i18n.__('auth.unauthorized') });
       return;
@@ -82,7 +83,7 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
 
     res.status(StatusCodes.CREATED).json(newBooking);
   } catch (error) {
-    logger.error('Error creating booking', { error, userId: req.user?.id });
+    logger.error('Error creating booking', { error, userId: (req.user as any)?.id });
     
     if (error.message === 'Service not available' || error.message === 'Time slot not available') {
       res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
@@ -98,7 +99,7 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
  */
 export const cancelBooking = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = (req.user as any)?.id;
     if (!userId) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: i18n.__('auth.unauthorized') });
       return;
@@ -116,7 +117,7 @@ export const cancelBooking = async (req: Request, res: Response): Promise<void> 
 
     res.status(StatusCodes.OK).json({ message: i18n.__('booking.cancelled'), booking: result.booking });
   } catch (error) {
-    logger.error('Error cancelling booking', { error, userId: req.user?.id, bookingId: req.params.id });
+    logger.error('Error cancelling booking', { error, userId: (req.user as any)?.id, bookingId: req.params.id });
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: i18n.__('common.serverError') });
   }
 };
@@ -132,7 +133,7 @@ export const rescheduleBooking = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    const userId = req.user?.id;
+    const userId = (req.user as any)?.id;
     if (!userId) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: i18n.__('auth.unauthorized') });
       return;
@@ -150,7 +151,7 @@ export const rescheduleBooking = async (req: Request, res: Response): Promise<vo
 
     res.status(StatusCodes.OK).json({ message: i18n.__('booking.rescheduled'), booking: result.booking });
   } catch (error) {
-    logger.error('Error rescheduling booking', { error, userId: req.user?.id, bookingId: req.params.id });
+    logger.error('Error rescheduling booking', { error, userId: (req.user as any)?.id, bookingId: req.params.id });
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: i18n.__('common.serverError') });
   }
 };
@@ -185,7 +186,7 @@ export const getAvailableTimeSlots = async (req: Request, res: Response): Promis
  */
 export const getBookingStatusHistory = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = (req.user as any)?.id;
     if (!userId) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: i18n.__('auth.unauthorized') });
       return;
@@ -201,7 +202,7 @@ export const getBookingStatusHistory = async (req: Request, res: Response): Prom
 
     res.status(StatusCodes.OK).json(statusHistory);
   } catch (error) {
-    logger.error('Error getting booking status history', { error, userId: req.user?.id, bookingId: req.params.id });
+    logger.error('Error getting booking status history', { error, userId: (req.user as any)?.id, bookingId: req.params.id });
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: i18n.__('common.serverError') });
   }
 };
@@ -211,7 +212,7 @@ export const getBookingStatusHistory = async (req: Request, res: Response): Prom
  */
 export const getBookingStatistics = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = (req.user as any)?.id;
     if (!userId) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: i18n.__('auth.unauthorized') });
       return;
@@ -220,7 +221,7 @@ export const getBookingStatistics = async (req: Request, res: Response): Promise
     const statistics = await customerBookingService.getCustomerBookingStatistics(userId);
     res.status(StatusCodes.OK).json(statistics);
   } catch (error) {
-    logger.error('Error getting booking statistics', { error, userId: req.user?.id });
+    logger.error('Error getting booking statistics', { error, userId: (req.user as any)?.id });
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: i18n.__('common.serverError') });
   }
 };

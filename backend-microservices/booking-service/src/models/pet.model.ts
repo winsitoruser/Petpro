@@ -53,7 +53,8 @@ export class Pet extends Model {
 
   @Column({
     type: DataType.ENUM(...Object.values(PetType)),
-    allowNull: false,
+    allowNull: true,
+    defaultValue: PetType.OTHER,
   })
   type: PetType;
 

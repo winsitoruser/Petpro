@@ -10,11 +10,11 @@ import { LoggerService } from '../../common/logger/logger.service';
       inject: [ConfigService, LoggerService],
       useFactory: (configService: ConfigService, loggerService: LoggerService) => {
         const env = configService.get<string>('NODE_ENV') || 'development';
-        const host = configService.get<string>('DB_HOST') || 'localhost';
+        const host = configService.get<string>('DB_HOST');
         const port = configService.get<number>('DB_PORT') || 5432;
         const username = configService.get<string>('DB_USERNAME') || 'postgres';
         const password = configService.get<string>('DB_PASSWORD') || 'postgres';
-        const database = configService.get<string>('DB_NAME') || `petpro_auth_${env}`;
+        const database = configService.get<string>('DB_DATABASE') || `petpro_vendor_dev`;
         
         // Log database connection info (without sensitive data)
         loggerService.log(
@@ -30,15 +30,18 @@ import { LoggerService } from '../../common/logger/logger.service';
           password,
           database,
           autoLoadModels: true,
-          synchronize: env === 'development', // Only in development
+          synchronize: false, // Disable auto sync, use migrations only
           logging: (msg) => loggerService.debug(msg, 'Sequelize'),
           define: {
             timestamps: true,
             underscored: true,
           },
-          dialectOptions: env === 'production' 
-            ? { ssl: { require: true, rejectUnauthorized: false } } 
-            : {},
+          dialectOptions: {
+            ssl: host && host.includes('rds.amazonaws.com') ? {
+              require: true,
+              rejectUnauthorized: false
+            } : false
+          },
           pool: {
             max: env === 'production' ? 20 : 5,
             min: 0,

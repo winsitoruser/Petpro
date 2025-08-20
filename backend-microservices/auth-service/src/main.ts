@@ -2,15 +2,40 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as helmet from 'helmet';
+import helmet from 'helmet';
 import { ConfigService } from '@nestjs/config';
 import { LoggerService } from './common/logger/logger.service';
 import { AllExceptionsFilter } from './filters/all-exceptions.filter';
+import { Sequelize } from 'sequelize-typescript';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   const loggerService = app.get(LoggerService);
+
+  // Run migrations automatically
+  try {
+    const sequelize = app.get(Sequelize);
+    await sequelize.authenticate();
+    loggerService.log('Database connection established successfully', 'Bootstrap');
+    
+    const { execSync } = require('child_process');
+    const path = require('path');
+    
+    // Run migrations
+    const configPath = path.join(process.cwd(), 'sequelize.config.js');
+    const migrationsPath = path.join(process.cwd(), 'src/database/migrations');
+    
+    loggerService.log('Running database migrations...', 'Bootstrap');
+    execSync(`npx sequelize-cli db:migrate --config ${configPath} --migrations-path ${migrationsPath}`, {
+      stdio: 'inherit',
+      env: { ...process.env, NODE_ENV: process.env.NODE_ENV || 'development' }
+    });
+    loggerService.log('Database migrations completed successfully', 'Bootstrap');
+  } catch (error) {
+    loggerService.error('Database migration failed: ' + error.message, error, 'Bootstrap');
+    process.exit(1);
+  }
   
   // Global prefix
   const apiPrefix = configService.get<string>('API_PREFIX') || '/api/v1';

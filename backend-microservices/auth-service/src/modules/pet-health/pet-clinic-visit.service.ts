@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Sequelize } from 'sequelize-typescript';
 import { PetClinicVisit, VisitStatus } from '../../models/pet-health/pet-clinic-visit.model';
 import { Pet } from '../../models/pet.model';
 import { CreatePetClinicVisitDto } from './dto/create-pet-clinic-visit.dto';
@@ -12,7 +11,6 @@ export class PetClinicVisitService {
     private petClinicVisitModel: typeof PetClinicVisit,
     @InjectModel(Pet)
     private petModel: typeof Pet,
-    private sequelize: Sequelize,
   ) {}
 
   async create(createPetClinicVisitDto: CreatePetClinicVisitDto): Promise<PetClinicVisit> {

@@ -8,11 +8,12 @@ import logger from '../utils/logger';
  * @param userId User ID
  * @returns Customer profile data
  */
+
 export const getCustomerProfile = async (userId: string) => {
   try {
     const user = await User.findByPk(userId, {
-      attributes: { 
-        exclude: ['password', 'createdAt', 'updatedAt', 'deletedAt'] 
+      attributes: {
+        exclude: ['password', 'createdAt', 'updatedAt', 'deletedAt']
       }
     });
 
@@ -84,11 +85,11 @@ export const updateCustomerProfile = async (userId: string, updateData: any) => 
 export const saveProfileImage = async (userId: string, file: Express.Multer.File) => {
   try {
     const key = `profile-images/${userId}/${Date.now()}-${file.originalname}`;
-    const result = await uploadToS3(file.buffer, key, file.mimetype);
+    const result = await uploadToS3(userId, file);
 
     await User.update({
       profileImage: key
-    }, {
+    } as any, {
       where: {
         id: userId,
         role: 'customer'

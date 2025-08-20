@@ -18,10 +18,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seed": "ts-node -r tsconfig-paths/register src/database/seeders/index.ts",
-    "seed:dev": "cross-env NODE_ENV=development npm run seed",
-    "seed:prod": "cross-env NODE_ENV=production npm run seed"
+    "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -33,13 +30,12 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/sequelize": "^10.0.0",
     "@nestjs/swagger": "^7.1.1",
-    "amqp-connection-manager": "^4.1.14",
-    "amqplib": "^0.10.3",
     "bcrypt": "^5.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "cross-env": "^7.0.3",
     "dotenv": "^16.3.1",
+    "ioredis": "^5.7.0",
     "joi": "^17.9.2",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",

@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
 import { InventoryController } from './inventory.controller';
 
 @Module({
-  imports: [ConfigModule],
+  imports: [HttpModule],
   controllers: [InventoryController],
 })
 export class InventoryModule {}

@@ -53,6 +53,7 @@ export class Service extends Model {
     allowNull: false,
     defaultValue: 30,
     comment: 'Duration in minutes',
+    field: 'duration_minutes',
   })
   duration: number;
 
@@ -62,10 +63,16 @@ export class Service extends Model {
   })
   category: ServiceCategory;
 
+  // Alias for category for compatibility
+  get type(): ServiceCategory {
+    return this.category;
+  }
+
   @Column({
     type: DataType.UUID,
     allowNull: false,
     comment: 'Vendor/Provider ID',
+    field: 'provider_id',
   })
   providerId: string;
 
@@ -73,6 +80,7 @@ export class Service extends Model {
     type: DataType.STRING,
     allowNull: true,
     comment: 'Image URL for the service',
+    field: 'image_url',
   })
   imageUrl: string;
 
@@ -80,6 +88,7 @@ export class Service extends Model {
     type: DataType.BOOLEAN,
     allowNull: false,
     defaultValue: true,
+    field: 'is_active',
   })
   isActive: boolean;
 

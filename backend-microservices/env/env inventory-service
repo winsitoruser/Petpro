@@ -1,0 +1,23 @@
+# Environment
+NODE_ENV=development
+
+# Server Configuration
+PORT=3003
+
+# Database Configuration
+DB_HOST=ls-da9311c68b227ba9477a97f644bc7679989cb867.crs0agc04xhl.ap-southeast-1.rds.amazonaws.com
+DB_PORT=5432
+DB_USERNAME=dbmasteruser
+DB_PASSWORD=p6tV9eKpyqGJ8Xk3m2FfNwQ7rZbC1d1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
+DB_DATABASE=petpro_product_dev
+
+# Kafka Configuration
+KAFKA_BROKERS=localhost:9092
+KAFKA_GROUP_ID=inventory-service-group
+KAFKA_CLIENT_ID=inventory-service
+
+# Logging
+LOG_LEVEL=debug
+
+# CORS
+CORS_ORIGIN=http://localhost:3004,http://localhost:3000

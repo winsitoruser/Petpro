@@ -1,3 +1,4 @@
+/// <reference path="../types/express.d.ts" />
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { validationResult } from 'express-validator';
@@ -16,7 +17,7 @@ export const createReview = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    const userId = req.user?.id;
+    const userId = (req.user as any)?.id;
     if (!userId) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: i18n.__('auth.unauthorized') });
       return;
@@ -39,7 +40,7 @@ export const createReview = async (req: Request, res: Response): Promise<void> =
 
     res.status(StatusCodes.CREATED).json(result.review);
   } catch (error) {
-    logger.error('Error creating review', { error, userId: req.user?.id });
+    logger.error('Error creating review', { error, userId: (req.user as any)?.id });
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: i18n.__('common.serverError') });
   }
 };
@@ -55,7 +56,7 @@ export const updateReview = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    const userId = req.user?.id;
+    const userId = (req.user as any)?.id;
     if (!userId) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: i18n.__('auth.unauthorized') });
       return;
@@ -79,7 +80,7 @@ export const updateReview = async (req: Request, res: Response): Promise<void> =
 
     res.status(StatusCodes.OK).json(result.review);
   } catch (error) {
-    logger.error('Error updating review', { error, userId: req.user?.id, reviewId: req.params.id });
+    logger.error('Error updating review', { error, userId: (req.user as any)?.id, reviewId: req.params.id });
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: i18n.__('common.serverError') });
   }
 };
@@ -89,7 +90,7 @@ export const updateReview = async (req: Request, res: Response): Promise<void> =
  */
 export const deleteReview = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = (req.user as any)?.id;
     if (!userId) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: i18n.__('auth.unauthorized') });
       return;
@@ -105,7 +106,7 @@ export const deleteReview = async (req: Request, res: Response): Promise<void> =
 
     res.status(StatusCodes.OK).json({ message: i18n.__('review.deleted') });
   } catch (error) {
-    logger.error('Error deleting review', { error, userId: req.user?.id, reviewId: req.params.id });
+    logger.error('Error deleting review', { error, userId: (req.user as any)?.id, reviewId: req.params.id });
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: i18n.__('common.serverError') });
   }
 };
@@ -152,7 +153,7 @@ export const getVendorReviewSummary = async (req: Request, res: Response): Promi
  */
 export const markReviewHelpful = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = (req.user as any)?.id;
     if (!userId) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: i18n.__('auth.unauthorized') });
       return;
@@ -168,7 +169,7 @@ export const markReviewHelpful = async (req: Request, res: Response): Promise<vo
 
     res.status(StatusCodes.OK).json({ message: i18n.__('review.markedHelpful'), helpfulCount: result.helpfulCount });
   } catch (error) {
-    logger.error('Error marking review as helpful', { error, userId: req.user?.id, reviewId: req.params.id });
+    logger.error('Error marking review as helpful', { error, userId: (req.user as any)?.id, reviewId: req.params.id });
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: i18n.__('common.serverError') });
   }
 };
@@ -178,7 +179,7 @@ export const markReviewHelpful = async (req: Request, res: Response): Promise<vo
  */
 export const getCustomerReviews = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = (req.user as any)?.id;
     if (!userId) {
       res.status(StatusCodes.UNAUTHORIZED).json({ message: i18n.__('auth.unauthorized') });
       return;
@@ -193,7 +194,7 @@ export const getCustomerReviews = async (req: Request, res: Response): Promise<v
     const reviews = await reviewService.getCustomerReviews(userId, filterOptions);
     res.status(StatusCodes.OK).json(reviews);
   } catch (error) {
-    logger.error('Error getting customer reviews', { error, userId: req.user?.id });
+    logger.error('Error getting customer reviews', { error, userId: (req.user as any)?.id });
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: i18n.__('common.serverError') });
   }
 };

@@ -58,6 +58,13 @@ export class Booking extends Model {
   })
   customerId: string;
 
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    comment: 'Vendor/Provider ID',
+  })
+  vendorId: string;
+
   @ForeignKey(() => Service)
   @Column({
     type: DataType.UUID,
@@ -91,14 +98,31 @@ export class Booking extends Model {
   endTime: Date;
 
   @Column({
-    type: DataType.ENUM(...Object.values(BookingStatus)),
+    type: DataType.UUID,
+    allowNull: true,
+    comment: 'Time slot ID (if applicable)',
+  })
+  timeSlotId: string;
+
+  // Virtual property for compatibility
+  get date(): Date {
+    return this.startTime;
+  }
+
+  // Virtual property for compatibility
+  get timeSlot(): any {
+    return { id: this.timeSlotId };
+  }
+
+  @Column({
+    type: 'enum_booking_status',
     allowNull: false,
     defaultValue: BookingStatus.PENDING,
   })
   status: BookingStatus;
 
   @Column({
-    type: DataType.ENUM(...Object.values(PaymentStatus)),
+    type: DataType.STRING,
     allowNull: false,
     defaultValue: PaymentStatus.PENDING,
   })
@@ -138,7 +162,7 @@ export class Booking extends Model {
   assignedStaffId: string;
 
   @Column({
-    type: DataType.UUID,
+    type: DataType.STRING(100),
     allowNull: true,
     comment: 'ID of related payment record',
   })

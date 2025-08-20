@@ -39,7 +39,7 @@ router.post(
   '/profile/image',
   authenticate,
   customerOnly,
-  uploadMiddleware.single('profileImage'),
+  uploadMiddleware,
   customerController.uploadProfileImage
 );
 

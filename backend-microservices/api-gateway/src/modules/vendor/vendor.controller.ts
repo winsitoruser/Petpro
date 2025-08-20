@@ -1,200 +1,135 @@
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Body, Controller, Get, Param, Post, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('vendors')
 @Controller('vendors')
 export class VendorController {
+  private readonly vendorServiceUrl: string;
+
   constructor(
-    @Inject('VENDOR_SERVICE') private readonly vendorServiceClient: ClientProxy,
-  ) {}
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {
+    this.vendorServiceUrl = this.configService.get<string>('VENDOR_SERVICE_URL') || 'http://localhost:3006';
+  }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: 'Get all vendors' })
-  @ApiResponse({ status: 200, description: 'Returns list of vendors' })
-  async findAll(@Query() query: any) {
-    return firstValueFrom(this.vendorServiceClient.send('vendor.findAll', query));
+  @ApiResponse({ status: 200, description: 'Return all vendors.' })
+  async getAllVendors(@Query() query: any) {
+    const response = await firstValueFrom(
+      this.httpService.get(`${this.vendorServiceUrl}/api/v1/vendors`, {
+        params: query,
+      })
+    );
+    return response.data;
   }
 
   @Get('search')
-  @ApiOperation({ summary: 'Search for vendors' })
-  @ApiResponse({ status: 200, description: 'Returns search results for vendors' })
-  async search(@Query() query: any) {
-    return firstValueFrom(this.vendorServiceClient.send('vendor.search', query));
+  @Public()
+  @ApiOperation({ summary: 'Search vendors by name or location' })
+  @ApiResponse({ status: 200, description: 'Return matching vendors.' })
+  async searchVendors(@Query('query') query: string) {
+    const response = await firstValueFrom(
+      this.httpService.get(`${this.vendorServiceUrl}/api/v1/vendors/search`, {
+        params: { query },
+      })
+    );
+    return response.data;
   }
 
   @Get(':id')
+  @Public()
   @ApiOperation({ summary: 'Get vendor by ID' })
-  @ApiResponse({ status: 200, description: 'Returns vendor details' })
-  @ApiResponse({ status: 404, description: 'Vendor not found' })
-  async findById(@Param('id', ParseUUIDPipe) id: string) {
-    return firstValueFrom(this.vendorServiceClient.send('vendor.findById', { id }));
+  @ApiResponse({ status: 200, description: 'Return the vendor.' })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  async getVendor(@Param('id', ParseUUIDPipe) id: string) {
+    const response = await firstValueFrom(
+      this.httpService.get(`${this.vendorServiceUrl}/api/v1/vendors/${id}`)
+    );
+    return response.data;
   }
 
-  @Get('user/:userId')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('vendor', 'admin')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get vendor by user ID' })
-  @ApiResponse({ status: 200, description: 'Returns vendor details' })
-  @ApiResponse({ status: 404, description: 'Vendor not found' })
-  async findByUserId(@Param('userId', ParseUUIDPipe) userId: string, @CurrentUser() user: any) {
-    // Check if user is accessing their own vendor profile or is admin
-    if (user.role !== 'admin' && user.id !== userId) {
-      throw new Error('Unauthorized: You can only access your own vendor profile');
-    }
-    return firstValueFrom(this.vendorServiceClient.send('vendor.findByUserId', { userId }));
+  @Get(':id/products')
+  @Public()
+  @ApiOperation({ summary: 'Get products by vendor ID' })
+  @ApiResponse({ status: 200, description: 'Return vendor products.' })
+  async getVendorProducts(@Param('id', ParseUUIDPipe) id: string, @Query() query: any) {
+    const response = await firstValueFrom(
+      this.httpService.get(`${this.vendorServiceUrl}/api/v1/vendors/${id}/products`, {
+        params: query,
+      })
+    );
+    return response.data;
   }
 
-  @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('vendor', 'admin')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create a new vendor' })
-  @ApiResponse({ status: 201, description: 'Vendor successfully created' })
-  @ApiResponse({ status: 400, description: 'Invalid input' })
-  async create(@Body() createVendorDto: any, @CurrentUser() user: any) {
-    const payload = { ...createVendorDto, userId: user.id };
-    return firstValueFrom(this.vendorServiceClient.send('vendor.create', payload));
+  @Get(':id/services')
+  @Public()
+  @ApiOperation({ summary: 'Get services by vendor ID' })
+  @ApiResponse({ status: 200, description: 'Return vendor services.' })
+  async getVendorServices(@Param('id', ParseUUIDPipe) id: string, @Query() query: any) {
+    const response = await firstValueFrom(
+      this.httpService.get(`${this.vendorServiceUrl}/api/v1/vendors/${id}/services`, {
+        params: query,
+      })
+    );
+    return response.data;
   }
 
-  @Put(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('vendor', 'admin')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update a vendor' })
-  @ApiResponse({ status: 200, description: 'Vendor successfully updated' })
-  @ApiResponse({ status: 404, description: 'Vendor not found' })
-  async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateVendorDto: any, @CurrentUser() user: any) {
-    const vendor = await firstValueFrom(this.vendorServiceClient.send('vendor.findById', { id }));
-    
-    // Check if user is updating their own vendor profile or is admin
-    if (user.role !== 'admin' && vendor.userId !== user.id) {
-      throw new Error('Unauthorized: You can only update your own vendor profile');
-    }
-    
-    const payload = { id, ...updateVendorDto, userId: user.id };
-    return firstValueFrom(this.vendorServiceClient.send('vendor.update', payload));
+  @Post('register')
+  @Public()
+  @ApiOperation({ summary: 'Register new vendor' })
+  @ApiResponse({ status: 201, description: 'Vendor registered successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
+  async registerVendor(@Body() registerDto: any) {
+    const response = await firstValueFrom(
+      this.httpService.post(`${this.vendorServiceUrl}/api/v1/vendors/register`, registerDto, {
+        headers: { 'Content-Type': 'application/json' },
+      })
+    );
+    return response.data;
   }
 
-  @Put(':id/status')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('vendor', 'admin')
+  // Customer reviews for vendors
+  @Get(':id/reviews')
+  @Public()
+  @ApiOperation({ summary: 'Get vendor reviews' })
+  @ApiResponse({ status: 200, description: 'Return vendor reviews.' })
+  async getVendorReviews(@Param('id', ParseUUIDPipe) id: string, @Query() query: any) {
+    const response = await firstValueFrom(
+      this.httpService.get(`${this.vendorServiceUrl}/api/v1/vendors/${id}/reviews`, {
+        params: query,
+      })
+    );
+    return response.data;
+  }
+
+  @Post(':id/reviews')
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update vendor status' })
-  @ApiResponse({ status: 200, description: 'Vendor status successfully updated' })
-  @ApiResponse({ status: 404, description: 'Vendor not found' })
-  async updateStatus(
+  @ApiOperation({ summary: 'Add vendor review' })
+  @ApiResponse({ status: 201, description: 'Review added successfully' })
+  async addVendorReview(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body('status') status: string,
-    @CurrentUser() user: any,
+    @Body() reviewDto: any,
+    @CurrentUser() user: any
   ) {
-    const vendor = await firstValueFrom(this.vendorServiceClient.send('vendor.findById', { id }));
-    
-    // Check if user is updating their own vendor profile or is admin
-    if (user.role !== 'admin' && vendor.userId !== user.id) {
-      throw new Error('Unauthorized: You can only update your own vendor profile');
-    }
-    
-    return firstValueFrom(this.vendorServiceClient.send('vendor.updateStatus', { id, status }));
-  }
-
-  @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete a vendor' })
-  @ApiResponse({ status: 204, description: 'Vendor successfully deleted' })
-  @ApiResponse({ status: 404, description: 'Vendor not found' })
-  async delete(@Param('id', ParseUUIDPipe) id: string) {
-    return firstValueFrom(this.vendorServiceClient.send('vendor.delete', { id }));
-  }
-
-  // Vendor Service routes
-  @Get(':vendorId/services')
-  @ApiOperation({ summary: 'Get all services for a vendor' })
-  @ApiResponse({ status: 200, description: 'Returns list of services for the vendor' })
-  @ApiResponse({ status: 404, description: 'Vendor not found' })
-  async findAllServices(@Param('vendorId', ParseUUIDPipe) vendorId: string) {
-    return firstValueFrom(this.vendorServiceClient.send('vendor.services.findAll', { vendorId }));
-  }
-
-  @Get('services/:id')
-  @ApiOperation({ summary: 'Get service by ID' })
-  @ApiResponse({ status: 200, description: 'Returns service details' })
-  @ApiResponse({ status: 404, description: 'Service not found' })
-  async findServiceById(@Param('id', ParseUUIDPipe) id: string) {
-    return firstValueFrom(this.vendorServiceClient.send('vendor.services.findById', { id }));
-  }
-
-  @Post('services')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('vendor', 'admin')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create a new service' })
-  @ApiResponse({ status: 201, description: 'Service successfully created' })
-  @ApiResponse({ status: 400, description: 'Invalid input' })
-  async createService(@Body() createServiceDto: any, @CurrentUser() user: any) {
-    // Check if vendor exists and belongs to current user
-    const vendor = await firstValueFrom(this.vendorServiceClient.send('vendor.findByUserId', { userId: user.id }));
-    
-    if (!vendor && user.role !== 'admin') {
-      throw new Error('You must have a vendor profile to create services');
-    }
-    
-    const payload = { ...createServiceDto, vendorId: vendor.id };
-    return firstValueFrom(this.vendorServiceClient.send('vendor.services.create', payload));
-  }
-
-  @Put('services/:id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('vendor', 'admin')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update a service' })
-  @ApiResponse({ status: 200, description: 'Service successfully updated' })
-  @ApiResponse({ status: 404, description: 'Service not found' })
-  async updateService(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateServiceDto: any,
-    @CurrentUser() user: any,
-  ) {
-    // Get the service first to verify ownership
-    const service = await firstValueFrom(this.vendorServiceClient.send('vendor.services.findById', { id }));
-    
-    // Check if service belongs to a vendor owned by current user or user is admin
-    const vendor = await firstValueFrom(this.vendorServiceClient.send('vendor.findById', { id: service.vendorId }));
-    
-    if (user.role !== 'admin' && vendor.userId !== user.id) {
-      throw new Error('Unauthorized: You can only update your own services');
-    }
-    
-    const payload = { id, ...updateServiceDto };
-    return firstValueFrom(this.vendorServiceClient.send('vendor.services.update', payload));
-  }
-
-  @Delete('services/:id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('vendor', 'admin')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete a service' })
-  @ApiResponse({ status: 204, description: 'Service successfully deleted' })
-  @ApiResponse({ status: 404, description: 'Service not found' })
-  async deleteService(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: any) {
-    // Get the service first to verify ownership
-    const service = await firstValueFrom(this.vendorServiceClient.send('vendor.services.findById', { id }));
-    
-    // Check if service belongs to a vendor owned by current user or user is admin
-    const vendor = await firstValueFrom(this.vendorServiceClient.send('vendor.findById', { id: service.vendorId }));
-    
-    if (user.role !== 'admin' && vendor.userId !== user.id) {
-      throw new Error('Unauthorized: You can only delete your own services');
-    }
-    
-    return firstValueFrom(this.vendorServiceClient.send('vendor.services.delete', { id }));
+    const response = await firstValueFrom(
+      this.httpService.post(
+        `${this.vendorServiceUrl}/api/v1/vendors/${id}/reviews`,
+        { ...reviewDto, customerId: user.id },
+        {
+          headers: { 'X-User-Id': user.id, 'Content-Type': 'application/json' },
+        }
+      )
+    );
+    return response.data;
   }
 }

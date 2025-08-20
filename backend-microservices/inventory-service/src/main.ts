@@ -1,16 +1,38 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { DatabaseSeeder } from './database/seeders/index';
+import { ValidationPipe, Logger } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { Sequelize } from 'sequelize-typescript';
 
 async function bootstrap() {
-  // Check if we're running in seed mode
-  const args = process.argv.slice(2);
-  const seedMode = args.includes('--seed');
+  const logger = new Logger('Bootstrap');
   
   // Create the main HTTP application
   const app = await NestFactory.create(AppModule);
+
+  // Run migrations automatically
+  try {
+    const sequelize = app.get(Sequelize);
+    await sequelize.authenticate();
+    logger.log('Database connection established successfully');
+    
+    const { execSync } = require('child_process');
+    const path = require('path');
+    
+    // Run migrations
+    const configPath = path.join(process.cwd(), 'sequelize.config.js');
+    const migrationsPath = path.join(process.cwd(), 'src/database/migrations');
+    
+    logger.log('Running database migrations...');
+    execSync(`npx sequelize-cli db:migrate --config ${configPath} --migrations-path ${migrationsPath}`, {
+      stdio: 'inherit',
+      env: { ...process.env, NODE_ENV: process.env.NODE_ENV || 'development' }
+    });
+    logger.log('Database migrations completed successfully');
+  } catch (error) {
+    logger.error('Database migration failed:', error.message);
+    process.exit(1);
+  }
   
   app.enableCors();
   
@@ -21,43 +43,27 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
   }));
   
-  // Connect as Kafka microservice
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        clientId: 'inventory-service',
-        brokers: [process.env.KAFKA_BROKERS || 'localhost:9092'],
-      },
-      consumer: {
-        groupId: 'inventory-service-group',
-      },
-    },
-  });
+  // API prefix
+  const apiPrefix = process.env.API_PREFIX || '/api/v1';
+  app.setGlobalPrefix(apiPrefix);
   
-  // Start all microservices
-  await app.startAllMicroservices();
+  // Swagger documentation
+  const config = new DocumentBuilder()
+    .setTitle('PetPro Inventory Service API')
+    .setDescription('Inventory and Product management service for PetPro')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup(`${apiPrefix}/docs`, app, document);
   
-  // Check if seed mode is active
-  if (seedMode) {
-    try {
-      const databaseSeeder = app.get(DatabaseSeeder);
-      await databaseSeeder.seed();
-      console.log('Database seeding completed successfully!');
-      await app.close();
-      process.exit(0);
-    } catch (error) {
-      console.error('Error during database seeding:', error);
-      await app.close();
-      process.exit(1);
-    }
-  } else {
-    // Start HTTP server in normal mode
-    const httpPort = process.env.PORT || 3003;
-    await app.listen(httpPort);
-    
-    console.log(`Inventory Service running on port ${httpPort} with Kafka microservice`);
-  }
+  // Start HTTP server
+  const httpPort = process.env.PORT || 3003;
+  await app.listen(httpPort);
+  
+  logger.log(`🚀 Inventory Service running on port ${httpPort}`);
+  logger.log(`📚 Swagger docs available at http://localhost:${httpPort}${apiPrefix}/docs`);
 }
 
 bootstrap();

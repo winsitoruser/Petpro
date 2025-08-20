@@ -36,7 +36,10 @@ export class UserService {
 
   async findById(id: string): Promise<User> {
     const user = await this.userModel.findByPk(id, {
-      attributes: { exclude: ['password'] },
+      attributes: [
+        'id', 'firstName', 'lastName', 'email', 'role', 
+        'isEmailVerified', 'active', 'lastLogin', 'createdAt', 'updatedAt'
+      ],
     });
 
     if (!user) {
@@ -45,6 +48,26 @@ export class UserService {
     }
 
     return user;
+  }
+
+  async findByIds(ids: string[]): Promise<User[]> {
+    if (!ids || ids.length === 0) {
+      return [];
+    }
+
+    const users = await this.userModel.findAll({
+      where: {
+        id: {
+          [Op.in]: ids
+        }
+      },
+      attributes: [
+        'id', 'firstName', 'lastName', 'email', 'role', 
+        'isEmailVerified', 'active', 'lastLogin', 'createdAt', 'updatedAt'
+      ],
+    });
+
+    return users;
   }
 
   async findByEmail(email: string): Promise<User> {

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Sequelize } from 'sequelize-typescript';
+import { Sequelize, Op, QueryTypes } from 'sequelize';
 import { PetHealthRecord } from '../../models/pet-health/pet-health-record.model';
 import { PetVaccination } from '../../models/pet-health/pet-vaccination.model';
 import { PetMedication } from '../../models/pet-health/pet-medication.model';
@@ -20,7 +20,6 @@ export class PetHealthRecordService {
     private petMedicationModel: typeof PetMedication,
     @InjectModel(Pet)
     private petModel: typeof Pet,
-    private sequelize: Sequelize,
   ) {}
 
   async create(createPetHealthRecordDto: CreatePetHealthRecordDto): Promise<PetHealthRecord> {
@@ -31,7 +30,7 @@ export class PetHealthRecordService {
     }
 
     // Use transaction to ensure all operations are atomic
-    const transaction = await this.sequelize.transaction();
+    const transaction = await this.petHealthRecordModel.sequelize.transaction();
 
     try {
       // Create the health record
@@ -253,7 +252,7 @@ export class PetHealthRecordService {
       attributes: ['recordDate', 'weight', 'weightUnit'],
       where: { 
         petId,
-        weight: { [Sequelize.Op.not]: null } 
+        weight: { [Op.not]: null } 
       },
       order: [['recordDate', 'ASC']],
     });
@@ -264,9 +263,9 @@ export class PetHealthRecordService {
         petId,
         isActive: true,
         endDate: { 
-          [Sequelize.Op.or]: [
-            { [Sequelize.Op.gt]: new Date() },
-            { [Sequelize.Op.is]: null }
+          [Op.or]: [
+            { [Op.gt]: new Date() },
+            { [Op.is]: null }
           ]
         },
       },
@@ -281,7 +280,7 @@ export class PetHealthRecordService {
       where: {
         petId,
         expirationDate: {
-          [Sequelize.Op.between]: [today, nextThreeMonths],
+          [Op.between]: [today, nextThreeMonths],
         },
         isActive: true,
       },

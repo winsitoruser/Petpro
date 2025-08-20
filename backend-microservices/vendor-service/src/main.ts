@@ -1,5 +1,4 @@
 import { NestFactory } from '@nestjs/core';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -39,27 +38,13 @@ async function bootstrap() {
   // Enable CORS
   app.enableCors();
 
-  // Connect as microservice using RabbitMQ
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.RMQ,
-    options: {
-      urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
-      queue: process.env.VENDOR_QUEUE || 'vendor_queue',
-      queueOptions: {
-        durable: true,
-      },
-      noAck: false,
-    },
-  });
-
-  // Start all microservices
-  await app.startAllMicroservices();
+  // Redis service communication handled via RedisModule
   
   // Start HTTP server
   const port = process.env.PORT || 3004;
   await app.listen(port);
   console.log(`Vendor service is running on port ${port}`);
-  console.log(`Swagger documentation available at: http://localhost:${port}/api/docs`);
+  console.log(`Swagger documentation available at: http://${process.env.HOSTNAME || 'localhost'}:${port}/api/docs`);
 }
 
 bootstrap();

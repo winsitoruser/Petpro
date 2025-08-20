@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Sequelize } from 'sequelize-typescript';
+import { Sequelize, Op } from 'sequelize';
 import { PetHotelRoom } from '../../models/pet-hotel/pet-hotel-room.model';
 import { CreatePetHotelRoomDto } from './dto/create-pet-hotel-room.dto';
 import { UpdatePetHotelRoomDto } from './dto/update-pet-hotel-room.dto';
@@ -139,7 +139,7 @@ export class PetHotelRoomService {
       where: {
         roomId,
         date: {
-          [Sequelize.Op.between]: [startDate, endDate],
+          [Op.between]: [startDate, endDate],
         },
       },
       order: [['date', 'ASC']],
@@ -178,7 +178,7 @@ export class PetHotelRoomService {
         where: {
           roomId: room.id,
           date: {
-            [Sequelize.Op.between]: [startDate, endDate],
+            [Op.between]: [startDate, endDate],
           },
           isAvailable: false, // Look for dates where room is NOT available
         },

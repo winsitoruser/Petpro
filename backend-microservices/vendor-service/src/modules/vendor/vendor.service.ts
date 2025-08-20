@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Sequelize, Op } from 'sequelize';
+import { Op } from 'sequelize';
 import { Vendor, VendorStatus } from '../../models/vendor.model';
 import { VendorService as VendorServiceModel } from '../../models/vendor-service.model';
 import { CreateVendorDto } from './dto/create-vendor.dto';
@@ -13,7 +13,6 @@ export class VendorService {
     private vendorModel: typeof Vendor,
     @InjectModel(VendorServiceModel)
     private vendorServiceModel: typeof VendorServiceModel,
-    private sequelize: Sequelize,
   ) {}
 
   async findAll(options?: any): Promise<Vendor[]> {
@@ -62,7 +61,7 @@ export class VendorService {
     }
 
     // Start a transaction
-    const transaction = await this.sequelize.transaction();
+    const transaction = await this.vendorModel.sequelize.transaction();
 
     try {
       // Create new vendor
@@ -86,7 +85,7 @@ export class VendorService {
     const vendor = await this.findById(id);
     
     // Start a transaction
-    const transaction = await this.sequelize.transaction();
+    const transaction = await this.vendorModel.sequelize.transaction();
 
     try {
       // Update vendor
@@ -121,8 +120,8 @@ export class VendorService {
   async delete(id: string): Promise<void> {
     const vendor = await this.findById(id);
     
-    // Start a transaction
-    const transaction = await this.sequelize.transaction();
+    // Start a transaction using the model's sequelize instance
+    const transaction = await this.vendorModel.sequelize.transaction();
 
     try {
       // Delete all vendor services
@@ -175,7 +174,7 @@ export class VendorService {
       serviceData.priceFactors = serviceData.priceFactors.reduce((obj, factor) => {
         obj[factor.type] = factor.price;
         return obj;
-      }, {});
+      }, {} as any);
     }
 
     // Create new service

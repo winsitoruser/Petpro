@@ -226,7 +226,7 @@ export class CustomerIntegrationService {
         })),
         metadata: {
           registrationDate: user.createdAt,
-          lastLogin: user.lastLoginAt,
+          lastLogin: user.lastLogin,
           preferredLanguage: user.preferredLanguage,
         },
       };
@@ -363,7 +363,7 @@ export class CustomerIntegrationService {
         externalId: externalData.externalId || user.externalId,
         fullName: externalData.fullName || user.fullName,
         phoneNumber: externalData.phone || user.phoneNumber,
-        dateOfBirth: externalData.dateOfBirth || user.dateOfBirth,
+        dateOfBirth: externalData.dateOfBirth ? new Date(externalData.dateOfBirth) : user.dateOfBirth,
         gender: externalData.gender || user.gender,
         avatarUrl: externalData.avatarUrl || user.avatarUrl,
         metaData: {
@@ -394,12 +394,11 @@ export class CustomerIntegrationService {
         fullName: externalData.fullName,
         email: externalData.email,
         phoneNumber: externalData.phone,
-        dateOfBirth: externalData.dateOfBirth,
+        dateOfBirth: externalData.dateOfBirth ? new Date(externalData.dateOfBirth) : null,
         gender: externalData.gender,
         avatarUrl: externalData.avatarUrl,
         password: tempPassword, // This should be hashed by a pre-save hook in the model
-        role: 'pet_owner', // Default role
-        status: 'active',
+        role: 'customer', // Default role
         metaData: {
           externalSystemData: externalData.metadata,
           importedAt: new Date().toISOString(),
@@ -498,7 +497,7 @@ export class CustomerIntegrationService {
     try {
       // Get existing pets
       const existingPets = await this.petModel.findAll({
-        where: { ownerId: userId },
+        where: { userId: userId },
       });
       
       for (const externalPet of externalPets) {
@@ -514,7 +513,7 @@ export class CustomerIntegrationService {
             type: externalPet.type,
             breed: externalPet.breed,
             gender: externalPet.gender,
-            birthDate: externalPet.birthDate,
+            birthDate: externalPet.birthDate ? new Date(externalPet.birthDate) : null,
             weight: externalPet.weight,
             color: externalPet.color,
             microchipNumber: externalPet.microchipNumber,
@@ -523,17 +522,16 @@ export class CustomerIntegrationService {
         } else {
           // Create new pet
           await this.petModel.create({
-            ownerId: userId,
+            userId: userId,
             name: externalPet.name,
             type: externalPet.type,
             breed: externalPet.breed,
             gender: externalPet.gender,
-            birthDate: externalPet.birthDate,
+            birthDate: externalPet.birthDate ? new Date(externalPet.birthDate) : null,
             weight: externalPet.weight,
             color: externalPet.color,
             microchipNumber: externalPet.microchipNumber,
             imageUrl: externalPet.imageUrl,
-            status: 'active',
           });
         }
       }

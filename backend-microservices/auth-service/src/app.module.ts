@@ -6,7 +6,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { HealthModule } from './modules/health/health.module';
 import { LoggerModule } from './common/logger/logger.module';
-import { EventsModule } from './events/events.module';
+import { RedisModule } from './redis/redis.module';
 import { PetModule } from './modules/pet/pet.module';
 import { PetHealthModule } from './modules/pet-health/pet-health.module';
 import { ActivitiesModule } from './modules/activities/activities.module';
@@ -24,7 +24,7 @@ import { IntegrationModule } from './integration/integration.module';
     // Common modules
     LoggerModule,
     DatabaseModule,
-    EventsModule,
+    RedisModule,
     HealthModule,
     
     // Feature modules

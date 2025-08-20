@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { LoggerService } from './common/logger/logger.service';
+import { Sequelize } from 'sequelize-typescript';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -14,6 +15,30 @@ async function bootstrap() {
   // Get custom logger service
   const logger = app.get(LoggerService);
   app.useLogger(logger);
+
+  // Run migrations automatically
+  try {
+    const sequelize = app.get(Sequelize);
+    await sequelize.authenticate();
+    logger.log('Database connection established successfully', 'Bootstrap');
+    
+    const { execSync } = require('child_process');
+    const path = require('path');
+    
+    // Run migrations
+    const configPath = path.join(process.cwd(), 'sequelize.config.js');
+    const migrationsPath = path.join(process.cwd(), 'src/database/migrations');
+    
+    logger.log('Running database migrations...', 'Bootstrap');
+    execSync(`npx sequelize-cli db:migrate --config ${configPath} --migrations-path ${migrationsPath}`, {
+      stdio: 'inherit',
+      env: { ...process.env, NODE_ENV: process.env.NODE_ENV || 'development' }
+    });
+    logger.log('Database migrations completed successfully', 'Bootstrap');
+  } catch (error) {
+    logger.error('Database migration failed: ' + error.message, error, 'Bootstrap');
+    process.exit(1);
+  }
 
   // Global exception filter
   app.useGlobalFilters(new AllExceptionsFilter(logger));

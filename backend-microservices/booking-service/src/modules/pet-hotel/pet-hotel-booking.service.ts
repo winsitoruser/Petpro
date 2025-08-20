@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Sequelize } from 'sequelize-typescript';
+import { Sequelize, Op } from 'sequelize';
 import { PetHotelBooking, BookingStatus } from '../../models/pet-hotel/pet-hotel-booking.model';
 import { PetHotelRoom } from '../../models/pet-hotel/pet-hotel-room.model';
 import { PetHotelBookingService as PetHotelBookingServiceModel } from '../../models/pet-hotel/pet-hotel-booking-service.model';
@@ -75,13 +75,13 @@ export class PetHotelBookingService {
           where: {
             roomId: room.id,
             checkInDate: {
-              [Sequelize.Op.lte]: date,
+              [Op.lte]: date,
             },
             checkOutDate: {
-              [Sequelize.Op.gt]: date,
+              [Op.gt]: date,
             },
             status: {
-              [Sequelize.Op.notIn]: [BookingStatus.CANCELLED, BookingStatus.NO_SHOW],
+              [Op.notIn]: [BookingStatus.CANCELLED, BookingStatus.NO_SHOW],
             },
           },
           transaction,
@@ -104,8 +104,12 @@ export class PetHotelBookingService {
         vendorId: room.vendorId,
         checkInDate,
         checkOutDate,
-        expectedCheckInTime: createPetHotelBookingDto.expectedCheckInTime,
-        expectedCheckOutTime: createPetHotelBookingDto.expectedCheckOutTime,
+        expectedCheckInTime: createPetHotelBookingDto.expectedCheckInTime 
+          ? new Date(`${createPetHotelBookingDto.checkInDate}T${createPetHotelBookingDto.expectedCheckInTime}:00`) 
+          : null,
+        expectedCheckOutTime: createPetHotelBookingDto.expectedCheckOutTime 
+          ? new Date(`${createPetHotelBookingDto.checkOutDate}T${createPetHotelBookingDto.expectedCheckOutTime}:00`) 
+          : null,
         nightsCount,
         totalPrice, // Will be updated with additional services
         specialInstructions: createPetHotelBookingDto.specialInstructions,
@@ -136,7 +140,7 @@ export class PetHotelBookingService {
             serviceId: service.id,
             priceAtBooking: service.price,
             quantity: serviceInfo.quantity,
-            scheduledTime: serviceInfo.scheduledTime,
+            scheduledTime: serviceInfo.scheduledTime ? new Date(serviceInfo.scheduledTime) : null,
             notes: serviceInfo.notes,
           }, { transaction });
         }
@@ -171,27 +175,27 @@ export class PetHotelBookingService {
     }
     
     if (startDate && endDate) {
-      where[Sequelize.Op.or] = [
+      where[Op.or] = [
         {
           checkInDate: {
-            [Sequelize.Op.between]: [startDate, endDate],
+            [Op.between]: [startDate, endDate],
           },
         },
         {
           checkOutDate: {
-            [Sequelize.Op.between]: [startDate, endDate],
+            [Op.between]: [startDate, endDate],
           },
         },
         {
-          [Sequelize.Op.and]: [
+          [Op.and]: [
             {
               checkInDate: {
-                [Sequelize.Op.lte]: startDate,
+                [Op.lte]: startDate,
               },
             },
             {
               checkOutDate: {
-                [Sequelize.Op.gte]: endDate,
+                [Op.gte]: endDate,
               },
             },
           ],
@@ -276,16 +280,16 @@ export class PetHotelBookingService {
           // Check for existing bookings
           const existingBookingsCount = await this.petHotelBookingModel.count({
             where: {
-              id: { [Sequelize.Op.ne]: booking.id }, // Exclude current booking
+              id: { [Op.ne]: booking.id }, // Exclude current booking
               roomId: room.id,
               checkInDate: {
-                [Sequelize.Op.lte]: date,
+                [Op.lte]: date,
               },
               checkOutDate: {
-                [Sequelize.Op.gt]: date,
+                [Op.gt]: date,
               },
               status: {
-                [Sequelize.Op.notIn]: [BookingStatus.CANCELLED, BookingStatus.NO_SHOW],
+                [Op.notIn]: [BookingStatus.CANCELLED, BookingStatus.NO_SHOW],
               },
             },
             transaction,
@@ -339,16 +343,43 @@ export class PetHotelBookingService {
         }, 0);
         
         // Update the booking with new calculated values
-        updatePetHotelBookingDto.checkInDate = checkInDate.toISOString().split('T')[0];
-        updatePetHotelBookingDto.checkOutDate = checkOutDate.toISOString().split('T')[0];
+        const updateData: any = { ...updatePetHotelBookingDto };
+        // Convert date strings to Date objects
+        if (updateData.checkInDate) {
+          updateData.checkInDate = new Date(updateData.checkInDate);
+        }
+        if (updateData.checkOutDate) {
+          updateData.checkOutDate = new Date(updateData.checkOutDate);
+        }
+        if (updateData.expectedCheckInTime) {
+          updateData.expectedCheckInTime = new Date(`${updateData.checkInDate}T${updateData.expectedCheckInTime}:00`);
+        }
+        if (updateData.expectedCheckOutTime) {
+          updateData.expectedCheckOutTime = new Date(`${updateData.checkOutDate}T${updateData.expectedCheckOutTime}:00`);
+        }
+        
         await booking.update({
-          ...updatePetHotelBookingDto,
+          ...updateData,
           nightsCount,
           totalPrice: basePrice + servicesCost,
         }, { transaction });
       } else {
         // Update with provided data without recalculating
-        await booking.update(updatePetHotelBookingDto, { transaction });
+        const updateData: any = { ...updatePetHotelBookingDto };
+        // Convert date strings to Date objects
+        if (updateData.checkInDate) {
+          updateData.checkInDate = new Date(updateData.checkInDate);
+        }
+        if (updateData.checkOutDate) {
+          updateData.checkOutDate = new Date(updateData.checkOutDate);
+        }
+        if (updateData.expectedCheckInTime) {
+          updateData.expectedCheckInTime = new Date(`${updatePetHotelBookingDto.checkInDate}T${updateData.expectedCheckInTime}:00`);
+        }
+        if (updateData.expectedCheckOutTime) {
+          updateData.expectedCheckOutTime = new Date(`${updatePetHotelBookingDto.checkOutDate}T${updateData.expectedCheckOutTime}:00`);
+        }
+        await booking.update(updateData, { transaction });
       }
 
       await transaction.commit();

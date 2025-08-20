@@ -15,8 +15,9 @@ async function bootstrap() {
   
   // Get configuration service
   const configService = app.get(ConfigService);
-  const logger = app.get(LoggerService);
-  app.useLogger(logger);
+  // Use NestJS default logger for colored output
+  // const logger = app.get(LoggerService);
+  // app.useLogger(logger);
   
   // Set global prefix for all routes
   app.setGlobalPrefix('api');
@@ -42,7 +43,7 @@ async function bootstrap() {
   );
   
   // Apply global exception filter
-  app.useGlobalFilters(new AllExceptionsFilter(logger));
+  // app.useGlobalFilters(new AllExceptionsFilter(logger));
   
   // Set up Swagger documentation
   if (configService.get<string>('NODE_ENV') !== 'production') {
@@ -61,7 +62,7 @@ async function bootstrap() {
   const port = configService.get<number>('PORT', 3000);
   await app.listen(port);
   
-  logger.log(`Application is running on: ${await app.getUrl()}`);
+  console.log(`Application is running on: ${await app.getUrl()}`);
 }
 
 bootstrap();

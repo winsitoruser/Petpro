@@ -21,9 +21,10 @@ export class EventsService implements OnModuleInit, OnModuleDestroy {
     private readonly logger: LoggerService,
   ) {
     // Initialize Kafka client
+    const kafkaBrokers = this.configService.get<string>('KAFKA_BROKERS', 'localhost:9092');
     this.kafka = new Kafka({
       clientId: this.configService.get<string>('KAFKA_CLIENT_ID', 'booking-service'),
-      brokers: this.configService.get<string>('KAFKA_BROKERS', 'localhost:9092').split(','),
+      brokers: kafkaBrokers.split(',').filter(broker => broker.trim() !== ''),
       retry: {
         initialRetryTime: 100,
         retries: 8,
@@ -40,6 +41,13 @@ export class EventsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
+    const kafkaEnabled = this.configService.get<string>('KAFKA_ENABLED', 'false').toLowerCase() === 'true';
+    
+    if (!kafkaEnabled) {
+      this.logger.log('Kafka is disabled, skipping initialization', 'EventsService');
+      return;
+    }
+
     try {
       // Connect producer
       await this.producer.connect();
@@ -57,7 +65,7 @@ export class EventsService implements OnModuleInit, OnModuleDestroy {
 
       // Start consuming messages
       await this.consumer.run({
-        eachMessage: async ({ topic, partition, message }) => {
+        eachMessage: async ({ topic, message }) => {
           this.handleIncomingMessage(topic, message);
         },
       });
@@ -117,6 +125,13 @@ export class EventsService implements OnModuleInit, OnModuleDestroy {
    * @private
    */
   private async sendMessage(topic: string, message: any): Promise<void> {
+    const kafkaEnabled = this.configService.get<string>('KAFKA_ENABLED', 'false').toLowerCase() === 'true';
+    
+    if (!kafkaEnabled) {
+      this.logger.debug(`Kafka disabled, skipping message to ${topic}`, 'EventsService');
+      return;
+    }
+
     try {
       await this.producer.send({
         topic,

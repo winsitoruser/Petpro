@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import * as multer from 'multer';
+import multer from 'multer';
 
 // Configure multer for file uploads
 const storage = multer.memoryStorage();
@@ -13,7 +13,7 @@ const upload = multer({
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed'), false);
+      cb(new Error('Only image files are allowed') as any, false);
     }
   }
 });

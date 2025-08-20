@@ -119,8 +119,8 @@ install_dependencies() {
 start_infrastructure() {
     print_step "Starting infrastructure services..."
     
-    print_status "Starting PostgreSQL, Kafka, and Redis..."
-    docker-compose up -d postgres kafka redis
+    print_status "Starting PostgreSQL and Redis..."
+    docker-compose up -d postgres redis
     
     # Wait for services to be ready
     print_status "Waiting for services to be ready..."
@@ -144,21 +144,20 @@ start_infrastructure() {
         exit 1
     fi
     
-    # Check if Kafka is ready
+    # Check if Redis is ready
     attempt=1
     while [ $attempt -le $max_attempts ]; do
-        if docker exec petpro-kafka kafka-topics.sh --list --bootstrap-server localhost:9092 > /dev/null 2>&1; then
-            print_status "Kafka is ready ✓"
+        if docker exec petpro-redis redis-cli ping > /dev/null 2>&1; then
+            print_status "Redis is ready ✓"
             break
         fi
-        print_warning "Waiting for Kafka... (attempt $attempt/$max_attempts)"
+        print_warning "Waiting for Redis... (attempt $attempt/$max_attempts)"
         sleep 2
         attempt=$((attempt + 1))
     done
     
     if [ $attempt -gt $max_attempts ]; then
-        print_error "Kafka failed to start"
-        exit 1
+        print_warning "Redis failed to start (optional service)"
     fi
 }
 
@@ -166,7 +165,7 @@ start_infrastructure() {
 run_migrations() {
     print_step "Running database migrations..."
     
-    services=("admin-service" "auth-service" "booking-service")
+    services=("admin-service" "auth-service" "booking-service" "inventory-service")
     
     for service in "${services[@]}"; do
         if [ -d "$service" ]; then
@@ -215,7 +214,7 @@ verify_setup() {
     print_step "Verifying setup..."
     
     # Check if all containers are running
-    containers=("petpro-postgres" "petpro-kafka" "petpro-redis")
+    containers=("petpro-postgres" "petpro-redis")
     
     for container in "${containers[@]}"; do
         if docker ps | grep -q "$container"; then
@@ -259,8 +258,8 @@ main() {
     print_status "Next steps:"
     echo "1. Start all services: npm run dev:all"
     echo "2. Or use Docker: docker-compose up"
-    echo "3. Access admin dashboard: http://localhost:3004/api/admin/docs"
-    echo "4. Access API gateway: http://localhost:3000/api/docs"
+    echo "3. Access API Gateway: http://localhost:3000/api/docs"
+    echo "4. Access Admin Gateway: http://localhost:3004/api/docs"
     echo ""
     print_status "Default admin credentials:"
     echo "   Email: superadmin@petpro.com"

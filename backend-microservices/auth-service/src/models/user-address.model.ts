@@ -32,6 +32,12 @@ export class UserAddress extends Model {
     type: DataType.STRING,
     allowNull: false,
   })
+  addressLine1: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
   city: string;
 
   @Column({

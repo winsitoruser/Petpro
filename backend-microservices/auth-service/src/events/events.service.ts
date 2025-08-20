@@ -1,35 +1,17 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
-import { ClientKafka } from '@nestjs/microservices';
-import { LoggerService } from '../common/logger/logger.service';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { RedisPubSubService } from '../redis/redis-pubsub.service';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class EventsService implements OnModuleInit {
+  private readonly logger = new Logger(EventsService.name);
+
   constructor(
-    @Inject('KAFKA_CLIENT')
-    private readonly kafkaClient: ClientKafka,
-    private readonly logger: LoggerService,
+    private readonly pubSubService: RedisPubSubService,
   ) {}
 
   async onModuleInit() {
-    // List of topics this service will subscribe to
-    const topics = [
-      'user.profile.update',
-      'user.permissions.update',
-      'system.maintenance'
-    ];
-
-    // Subscribe to topics
-    topics.forEach(topic => {
-      this.kafkaClient.subscribeToResponseOf(topic);
-      this.logger.log(`Subscribed to topic: ${topic}`, 'EventsService');
-    });
-
-    try {
-      await this.kafkaClient.connect();
-      this.logger.log('Connected to Kafka broker', 'EventsService');
-    } catch (error) {
-      this.logger.error('Failed to connect to Kafka broker', error, 'EventsService');
-    }
+    this.logger.log('Events service initialized with Redis pub/sub');
   }
 
   /**
@@ -40,19 +22,24 @@ export class EventsService implements OnModuleInit {
     try {
       const { password, ...userDataWithoutPassword } = userData;
       
-      await this.kafkaClient.emit('user.created', {
-        id: userDataWithoutPassword.id,
-        email: userDataWithoutPassword.email,
-        firstName: userDataWithoutPassword.firstName,
-        lastName: userDataWithoutPassword.lastName,
-        role: userDataWithoutPassword.role,
-        createdAt: new Date().toISOString(),
-        eventId: this.generateEventId(),
+      await this.pubSubService.publish('user.created', {
+        type: 'user.created',
+        service: 'auth-service',
+        data: {
+          id: userDataWithoutPassword.id,
+          email: userDataWithoutPassword.email,
+          firstName: userDataWithoutPassword.firstName,
+          lastName: userDataWithoutPassword.lastName,
+          role: userDataWithoutPassword.role,
+          createdAt: new Date().toISOString(),
+          eventId: this.generateEventId(),
+        },
+        timestamp: new Date(),
       });
       
-      this.logger.log(`Published user.created event for user: ${userData.id}`, 'EventsService');
+      this.logger.log(`Published user.created event for user: ${userData.id}`);
     } catch (error) {
-      this.logger.error('Failed to publish user.created event', error, 'EventsService');
+      this.logger.error('Failed to publish user.created event', error);
     }
   }
 
@@ -63,17 +50,22 @@ export class EventsService implements OnModuleInit {
    */
   async publishUserLogin(userId: string, metadata: any): Promise<void> {
     try {
-      await this.kafkaClient.emit('user.login', {
-        userId,
-        timestamp: new Date().toISOString(),
-        ipAddress: metadata.ipAddress,
-        userAgent: metadata.userAgent,
-        eventId: this.generateEventId(),
+      await this.pubSubService.publish('user.login', {
+        type: 'user.login',
+        service: 'auth-service',
+        data: {
+          userId,
+          timestamp: new Date().toISOString(),
+          ipAddress: metadata.ipAddress,
+          userAgent: metadata.userAgent,
+          eventId: this.generateEventId(),
+        },
+        timestamp: new Date(),
       });
       
-      this.logger.log(`Published user.login event for user: ${userId}`, 'EventsService');
+      this.logger.log(`Published user.login event for user: ${userId}`);
     } catch (error) {
-      this.logger.error('Failed to publish user.login event', error, 'EventsService');
+      this.logger.error('Failed to publish user.login event', error);
     }
   }
 
@@ -85,19 +77,24 @@ export class EventsService implements OnModuleInit {
     try {
       const { password, ...userDataWithoutPassword } = userData;
       
-      await this.kafkaClient.emit('user.updated', {
-        id: userDataWithoutPassword.id,
-        email: userDataWithoutPassword.email,
-        firstName: userDataWithoutPassword.firstName,
-        lastName: userDataWithoutPassword.lastName,
-        role: userDataWithoutPassword.role,
-        updatedAt: new Date().toISOString(),
-        eventId: this.generateEventId(),
+      await this.pubSubService.publish('user.updated', {
+        type: 'user.updated',
+        service: 'auth-service',
+        data: {
+          id: userDataWithoutPassword.id,
+          email: userDataWithoutPassword.email,
+          firstName: userDataWithoutPassword.firstName,
+          lastName: userDataWithoutPassword.lastName,
+          role: userDataWithoutPassword.role,
+          updatedAt: new Date().toISOString(),
+          eventId: this.generateEventId(),
+        },
+        timestamp: new Date(),
       });
       
-      this.logger.log(`Published user.updated event for user: ${userData.id}`, 'EventsService');
+      this.logger.log(`Published user.updated event for user: ${userData.id}`);
     } catch (error) {
-      this.logger.error('Failed to publish user.updated event', error, 'EventsService');
+      this.logger.error('Failed to publish user.updated event', error);
     }
   }
 
@@ -107,15 +104,43 @@ export class EventsService implements OnModuleInit {
    */
   async publishPasswordResetRequested(userId: string): Promise<void> {
     try {
-      await this.kafkaClient.emit('user.password.reset.requested', {
-        userId,
-        timestamp: new Date().toISOString(),
-        eventId: this.generateEventId(),
+      await this.pubSubService.publish('user.password.reset.requested', {
+        type: 'user.password.reset.requested',
+        service: 'auth-service',
+        data: {
+          userId,
+          timestamp: new Date().toISOString(),
+          eventId: this.generateEventId(),
+        },
+        timestamp: new Date(),
       });
       
-      this.logger.log(`Published password reset requested event for user: ${userId}`, 'EventsService');
+      this.logger.log(`Published password reset requested event for user: ${userId}`);
     } catch (error) {
-      this.logger.error('Failed to publish password reset requested event', error, 'EventsService');
+      this.logger.error('Failed to publish password reset requested event', error);
+    }
+  }
+
+  /**
+   * Publish a user deleted event
+   * @param userId User ID
+   */
+  async publishUserDeleted(userId: string): Promise<void> {
+    try {
+      await this.pubSubService.publish('user.deleted', {
+        type: 'user.deleted',
+        service: 'auth-service',
+        data: {
+          userId,
+          deletedAt: new Date().toISOString(),
+          eventId: this.generateEventId(),
+        },
+        timestamp: new Date(),
+      });
+      
+      this.logger.log(`Published user.deleted event for user: ${userId}`);
+    } catch (error) {
+      this.logger.error('Failed to publish user.deleted event', error);
     }
   }
 
@@ -124,6 +149,6 @@ export class EventsService implements OnModuleInit {
    * @returns Unique event ID
    */
   private generateEventId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 }

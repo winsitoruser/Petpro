@@ -1,41 +1,82 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { ClientKafka } from '@nestjs/microservices';
+import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { firstValueFrom } from 'rxjs';
+import { AxiosResponse } from 'axios';
 
 @Injectable()
 export class InventoryService {
-  constructor(
-    @Inject('INVENTORY_SERVICE') private inventoryClient: ClientKafka,
-  ) {}
+  private readonly inventoryServiceUrl: string;
 
-  async onModuleInit() {
-    await this.inventoryClient.connect();
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {
+    this.inventoryServiceUrl = this.configService.get<string>('INVENTORY_SERVICE_URL') || 'http://localhost:3003';
   }
 
   async getProducts(token: string, query: any) {
-    return this.inventoryClient.send({ cmd: 'get_all_products' }, query).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.get(`${this.inventoryServiceUrl}/api/v1/products`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: query,
+      })
+    );
+    return response.data;
   }
 
   async getProductById(id: string, token: string) {
-    return this.inventoryClient.send({ cmd: 'get_product' }, id).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.get(`${this.inventoryServiceUrl}/api/v1/products/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    );
+    return response.data;
   }
 
   async createProduct(data: any, token: string) {
-    return this.inventoryClient.send({ cmd: 'create_product' }, data).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.post(`${this.inventoryServiceUrl}/api/v1/products`, data, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    );
+    return response.data;
   }
 
   async updateProduct(id: string, data: any, token: string) {
-    return this.inventoryClient.send({ cmd: 'update_product' }, { id, updateProductDto: data }).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.put(`${this.inventoryServiceUrl}/api/v1/products/${id}`, data, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    );
+    return response.data;
   }
 
   async deleteProduct(id: string, token: string) {
-    return this.inventoryClient.send({ cmd: 'delete_product' }, id).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.delete(`${this.inventoryServiceUrl}/api/v1/products/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    );
+    return response.data;
   }
 
   async getInventory(token: string, query: any) {
-    return this.inventoryClient.send({ cmd: 'get_low_stock' }, {}).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.get(`${this.inventoryServiceUrl}/api/v1/inventory`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: query,
+      })
+    );
+    return response.data;
   }
 
   async updateInventory(id: string, data: any, token: string) {
-    return this.inventoryClient.send({ cmd: 'update_inventory' }, { productId: id, updateInventoryDto: data }).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.put(`${this.inventoryServiceUrl}/api/v1/inventory/${id}`, data, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    );
+    return response.data;
   }
 }

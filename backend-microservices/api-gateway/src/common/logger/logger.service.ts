@@ -15,10 +15,11 @@ export class LoggerService implements NestLoggerService {
       winston.format.ms(),
       isProduction 
         ? winston.format.json() 
-        : winston.format.printf(({ level, message, timestamp, ms, context, ...meta }) => {
-            return `${timestamp} [${level.toUpperCase()}] [${context || 'Application'}]${ms} ${message} ${
-              Object.keys(meta).length ? JSON.stringify(meta) : ''
-            }`;
+        : winston.format.printf(({ level, message, timestamp, ms, context, service, ...meta }) => {
+            const serviceMeta = service ? JSON.stringify({ service }) : '';
+            const additionalMeta = Object.keys(meta).length ? JSON.stringify(meta) : '';
+            const metaString = serviceMeta || additionalMeta ? ` ${serviceMeta}${additionalMeta}` : '';
+            return `${timestamp} [${level.toUpperCase()}] [${context || 'Application'}]${ms} ${message}${metaString}`;
           })
     );
     

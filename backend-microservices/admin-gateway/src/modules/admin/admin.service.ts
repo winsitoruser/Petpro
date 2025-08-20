@@ -1,46 +1,92 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { ClientKafka } from '@nestjs/microservices';
+import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { firstValueFrom } from 'rxjs';
+import { AxiosResponse } from 'axios';
 
 @Injectable()
 export class AdminService {
-  constructor(
-    @Inject('ADMIN_SERVICE') private adminClient: ClientKafka,
-  ) {}
+  private readonly adminServiceUrl: string;
 
-  async onModuleInit() {
-    await this.adminClient.connect();
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {
+    this.adminServiceUrl = this.configService.get<string>('ADMIN_SERVICE_URL') || 'http://localhost:3005';
   }
 
   async getUsers(token: string, query: any) {
-    return this.adminClient.send({ cmd: 'get_admin_users' }, { token, query }).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.get(`${this.adminServiceUrl}/api/v1/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: query,
+      })
+    );
+    return response.data;
   }
 
   async getUserById(id: string, token: string) {
-    return this.adminClient.send({ cmd: 'get_admin_user' }, { id, token }).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.get(`${this.adminServiceUrl}/api/v1/users/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    );
+    return response.data;
   }
 
   async updateUser(id: string, data: any, token: string) {
-    return this.adminClient.send({ cmd: 'update_admin_user' }, { id, data, token }).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.put(`${this.adminServiceUrl}/api/v1/users/${id}`, data, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    );
+    return response.data;
   }
 
   async deactivateUser(id: string, token: string) {
-    return this.adminClient.send({ cmd: 'deactivate_admin_user' }, { id, token }).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.put(`${this.adminServiceUrl}/api/v1/users/${id}/deactivate`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    );
+    return response.data;
   }
 
   async activateUser(id: string, token: string) {
-    return this.adminClient.send({ cmd: 'activate_admin_user' }, { id, token }).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.put(`${this.adminServiceUrl}/api/v1/users/${id}/activate`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    );
+    return response.data;
   }
 
   async getDashboardStats(token: string) {
-    return this.adminClient.send({ cmd: 'get_dashboard_stats' }, { token }).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.get(`${this.adminServiceUrl}/api/v1/dashboard/stats`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    );
+    return response.data;
   }
 
   async getRecentActivity(token: string, query: any) {
-    return this.adminClient.send({ cmd: 'get_recent_activity' }, { token, query }).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.get(`${this.adminServiceUrl}/api/v1/dashboard/activity`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: query,
+      })
+    );
+    return response.data;
   }
 
   async getSystemHealth(token: string) {
-    return this.adminClient.send({ cmd: 'get_system_health' }, { token }).toPromise();
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.get(`${this.adminServiceUrl}/api/v1/dashboard/health`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    );
+    return response.data;
   }
 
 }

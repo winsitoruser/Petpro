@@ -1,4 +1,10 @@
-import { Booking, Service, TimeSlot, VendorSchedule, BookingStatus, Pet, User, StatusHistory } from '../models';
+import { Booking, BookingStatus } from '../models/booking.model';
+import { Service } from '../models/service.model';
+import { Pet } from '../models/pet.model';
+import { User } from '../models/user.model';
+import { StatusHistory } from '../models/status-history.model';
+import { TimeSlot } from '../models/time-slot.model';
+import { VendorSchedule } from '../models/vendor-schedule.model';
 import { Op } from 'sequelize';
 import { format, parseISO, isValid } from 'date-fns';
 import logger from '../utils/logger';
@@ -362,7 +368,7 @@ export const getAvailableTimeSlots = async (vendorId: string, serviceId: string,
       }
     });
 
-    if (!vendorSchedule || !vendorSchedule.isAvailable) {
+    if (!vendorSchedule || !vendorSchedule.isActive) {
       return { date, availableSlots: [] };
     }
 
@@ -536,11 +542,11 @@ export const getCustomerBookingStatistics = async (userId: string) => {
         {
           model: Service,
           as: 'service',
-          attributes: ['id', 'name', 'type']
+          attributes: ['id', 'name', 'category']
         }
       ],
       attributes: ['serviceId'],
-      group: ['serviceId', 'service.id', 'service.name', 'service.type']
+      group: ['serviceId', 'service.id', 'service.name', 'service.category']
     });
 
     // Group and count services
@@ -554,7 +560,7 @@ export const getCustomerBookingStatistics = async (userId: string) => {
           serviceCount[serviceId] = {
             id: serviceId,
             name: booking.service.name,
-            type: booking.service.type,
+            type: booking.service.category,
             count: 1
           };
         }

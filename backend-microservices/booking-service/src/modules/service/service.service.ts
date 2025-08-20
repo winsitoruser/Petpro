@@ -18,7 +18,7 @@ export class ServiceService {
 
   async create(createServiceDto: CreateServiceDto): Promise<Service> {
     try {
-      const service = await this.serviceModel.create(createServiceDto);
+      const service = await this.serviceModel.create(createServiceDto as any);
       
       this.logger.log(`Service created: ${service.id}`, 'ServiceService');
       

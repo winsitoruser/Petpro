@@ -8,4 +8,5 @@ export default {
   error: (message: string, context?: any) => logger.error(message, context),
   warn: (message: string, context?: any) => logger.warn(message, context),
   debug: (message: string, context?: any) => logger.debug(message, context),
+  info: (message: string, context?: any) => logger.log(message, context),
 };

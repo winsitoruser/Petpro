@@ -1,4 +1,8 @@
-import { Review, ReviewHelpful, Booking, User, Service } from '../models';
+import { Review } from '../models/review.model';
+import { ReviewHelpful } from '../models/review-helpful.model';
+import { Booking } from '../models/booking.model';
+import { User } from '../models/user.model';
+import { Service } from '../models/service.model';
 import { Op, Sequelize } from 'sequelize';
 import logger from '../utils/logger';
 
@@ -80,7 +84,7 @@ export const createReview = async (
             {
               model: Service,
               as: 'service',
-              attributes: ['id', 'name', 'type']
+              attributes: ['id', 'name', 'category']
             }
           ]
         }
@@ -161,7 +165,7 @@ export const updateReview = async (
             {
               model: Service,
               as: 'service',
-              attributes: ['id', 'name', 'type']
+              attributes: ['id', 'name', 'category']
             }
           ]
         }
@@ -254,7 +258,7 @@ export const getVendorReviews = async (vendorId: string, filterOptions: FilterOp
     }
     
     // Set up sort order
-    let order = [['createdAt', 'DESC']]; // Default sort by most recent
+    let order: any = [['createdAt', 'DESC']]; // Default sort by most recent
     
     if (sort === 'helpful') {
       order = [['helpfulCount', 'DESC'], ['createdAt', 'DESC']];
@@ -282,7 +286,7 @@ export const getVendorReviews = async (vendorId: string, filterOptions: FilterOp
             {
               model: Service,
               as: 'service',
-              attributes: ['id', 'name', 'type']
+              attributes: ['id', 'name', 'category']
             }
           ]
         }
@@ -456,7 +460,7 @@ export const getCustomerReviews = async (userId: string, filterOptions: { limit:
             {
               model: Service,
               as: 'service',
-              attributes: ['id', 'name', 'type']
+              attributes: ['id', 'name', 'category']
             }
           ]
         }
@@ -501,7 +505,7 @@ export const getReviewById = async (reviewId: string) => {
             {
               model: Service,
               as: 'service',
-              attributes: ['id', 'name', 'type']
+              attributes: ['id', 'name', 'category']
             }
           ]
         }

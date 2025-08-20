@@ -7,7 +7,7 @@ import { UpdateBookingDto } from './dto/update-booking.dto';
 import { Service } from '../../models/service.model';
 import { Pet } from '../../models/pet.model';
 import { ServiceAvailability } from '../../models/service-availability.model';
-import { KafkaProducerService } from '../events/kafka/kafka-producer.service';
+import { RedisPubSubService } from '../../redis/redis-pubsub.service';
 import { BookingEventsGateway } from '../events/booking-events.gateway';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class BookingService {
     private readonly petModel: typeof Pet,
     @InjectModel(ServiceAvailability)
     private readonly serviceAvailabilityModel: typeof ServiceAvailability,
-    private readonly kafkaProducer: KafkaProducerService,
+    private readonly pubSubService: RedisPubSubService,
     @Inject(forwardRef(() => BookingEventsGateway))
     private readonly bookingEventsGateway: BookingEventsGateway,
   ) {}
@@ -76,15 +76,20 @@ export class BookingService {
 
       this.logger.log(`Booking created: ${booking.id}`);
 
-      // Publish event for booking created via Kafka
-      await this.kafkaProducer.emitBookingCreated({
-        id: booking.id,
-        user_id: booking.customerId,
-        service_id: booking.serviceId,
-        pet_id: booking.petId,
-        start_time: booking.startTime,
-        end_time: booking.endTime,
-        status: booking.status,
+      // Publish event for booking created via Redis
+      await this.pubSubService.publish('booking.created', {
+        type: 'booking.created',
+        service: 'booking-service',
+        data: {
+          id: booking.id,
+          user_id: booking.customerId,
+          service_id: booking.serviceId,
+          pet_id: booking.petId,
+          start_time: booking.startTime,
+          end_time: booking.endTime,
+          status: booking.status,
+        },
+        timestamp: new Date(),
       });
       
       // Emit real-time event via WebSockets
@@ -285,15 +290,20 @@ export class BookingService {
 
       this.logger.log(`Booking updated: ${id}`);
       
-      // Publish event for booking updated via Kafka
-      await this.kafkaProducer.emitBookingUpdated({
-        id: booking.id,
-        user_id: booking.customerId,
-        service_id: booking.serviceId,
-        pet_id: booking.petId,
-        start_time: booking.startTime,
-        end_time: booking.endTime,
-        status: booking.status,
+      // Publish event for booking updated via Redis
+      await this.pubSubService.publish('booking.updated', {
+        type: 'booking.updated',
+        service: 'booking-service',
+        data: {
+          id: booking.id,
+          user_id: booking.customerId,
+          service_id: booking.serviceId,
+          pet_id: booking.petId,
+          start_time: booking.startTime,
+          end_time: booking.endTime,
+          status: booking.status,
+        },
+        timestamp: new Date(),
       });
       
       // Emit real-time event via WebSockets
@@ -344,12 +354,17 @@ export class BookingService {
       
       this.logger.log(`Booking cancelled: ${id}`);
       
-      // Publish event for booking cancelled via Kafka
-      await this.kafkaProducer.emitBookingCancelled({
-        id: booking.id,
-        user_id: booking.customerId,
-        service_id: booking.serviceId,
-        status: BookingStatus.CANCELLED,
+      // Publish event for booking cancelled via Redis
+      await this.pubSubService.publish('booking.cancelled', {
+        type: 'booking.cancelled',
+        service: 'booking-service',
+        data: {
+          id: booking.id,
+          user_id: booking.customerId,
+          service_id: booking.serviceId,
+          status: BookingStatus.CANCELLED,
+        },
+        timestamp: new Date(),
       });
       
       // Emit real-time event via WebSockets
@@ -399,14 +414,19 @@ export class BookingService {
       
       this.logger.log(`Booking confirmed: ${id}`);
       
-      // Publish event for booking confirmed via Kafka
-      await this.kafkaProducer.emitBookingUpdated({
-        id: booking.id,
-        user_id: booking.customerId,
-        service_id: booking.serviceId,
-        status: BookingStatus.CONFIRMED,
-        start_time: booking.startTime,
-        end_time: booking.endTime,
+      // Publish event for booking confirmed via Redis
+      await this.pubSubService.publish('booking.updated', {
+        type: 'booking.confirmed',
+        service: 'booking-service',
+        data: {
+          id: booking.id,
+          user_id: booking.customerId,
+          service_id: booking.serviceId,
+          status: BookingStatus.CONFIRMED,
+          start_time: booking.startTime,
+          end_time: booking.endTime,
+        },
+        timestamp: new Date(),
       });
       
       // Emit real-time event via WebSockets
@@ -578,13 +598,18 @@ export class BookingService {
         await booking.update({ status: BookingStatus.CONFIRMED });
         
         // Emit booking confirmed event
-        await this.kafkaProducer.emitBookingUpdated({
-          id: booking.id,
-          user_id: booking.customerId,
-          service_id: booking.serviceId,
-          status: BookingStatus.CONFIRMED,
-          start_time: booking.startTime,
-          end_time: booking.endTime,
+        await this.pubSubService.publish('booking.updated', {
+          type: 'booking.payment_confirmed',
+          service: 'booking-service',
+          data: {
+            id: booking.id,
+            user_id: booking.customerId,
+            service_id: booking.serviceId,
+            status: BookingStatus.CONFIRMED,
+            start_time: booking.startTime,
+            end_time: booking.endTime,
+          },
+          timestamp: new Date(),
         });
       }
       

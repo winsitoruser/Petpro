@@ -1,0 +1,28 @@
+# Environment
+NODE_ENV=development
+
+# Server Configuration
+PORT=3005
+API_PREFIX=/api/v1
+
+# Database Configuration
+DB_HOST=ls-da9311c68b227ba9477a97f644bc7679989cb867.crs0agc04xhl.ap-southeast-1.rds.amazonaws.com
+DB_PORT=5432
+DB_USERNAME=dbmasteruser
+DB_PASSWORD=p6tV9eKpyqGJ8Xk3m2FfNwQ7rZbC1d1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
+DB_DATABASE=petpro_admin_dev
+
+# JWT Configuration
+JWT_SECRET=admin_jwt_secret_key_change_in_production
+JWT_EXPIRATION=86400
+
+# Kafka Configuration
+KAFKA_BROKERS=localhost:9092
+KAFKA_GROUP_ID=admin-service-group
+KAFKA_CLIENT_ID=admin-service
+
+# Logging
+LOG_LEVEL=debug
+
+# CORS
+CORS_ORIGIN=http://localhost:3004,http://localhost:3010

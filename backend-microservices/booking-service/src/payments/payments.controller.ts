@@ -1,3 +1,4 @@
+/// <reference path="../types/express.d.ts" />
 import { 
   Controller, 
   Post, 
@@ -44,7 +45,7 @@ export class PaymentsController {
     this.logger.log(`Creating payment for booking ${createPaymentDto.bookingId}`);
     
     // Ensure only the customer can create their own payment or admin
-    if (req.user.role !== 'admin' && req.user.id !== createPaymentDto.customerId) {
+    if ((req.user as any).role !== 'admin' && (req.user as any).id !== createPaymentDto.customerId) {
       throw new BadRequestException('You can only create payments for yourself');
     }
     
@@ -111,7 +112,7 @@ export class PaymentsController {
     this.logger.log(`Getting payment methods for customer ${customerId}`);
     
     // Ensure only the customer can access their payment methods or admin
-    if (req.user.role !== 'admin' && req.user.id !== customerId) {
+    if ((req.user as any).role !== 'admin' && (req.user as any).id !== customerId) {
       throw new BadRequestException('You can only access your own payment methods');
     }
     

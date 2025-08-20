@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { JwtModule } from '@nestjs/jwt';
 import * as Joi from 'joi';
 import { DatabaseModule } from './modules/database/database.module';
 import { HealthModule } from './modules/health/health.module';
 import { VendorModule } from './modules/vendor/vendor.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -29,9 +29,11 @@ import { VendorModule } from './modules/vendor/vendor.module';
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRATION: Joi.string().default('1h'),
         
-        // RabbitMQ
-        RABBITMQ_URL: Joi.string().default('amqp://localhost:5672'),
-        VENDOR_QUEUE: Joi.string().default('vendor_queue'),
+        // Redis
+        REDIS_HOST: Joi.string().default('localhost'),
+        REDIS_PORT: Joi.number().default(6379),
+        REDIS_PASSWORD: Joi.string().optional(),
+        REDIS_DB: Joi.number().default(0),
       }),
     }),
     
@@ -46,16 +48,22 @@ import { VendorModule } from './modules/vendor/vendor.module';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
         autoLoadModels: true,
-        synchronize: configService.get('NODE_ENV') !== 'production',
-        logging: configService.get('NODE_ENV') === 'development',
+        synchronize: false, // Disable auto sync, use migrations only
+        logging: configService.get('NODE_ENV') !== 'production' ? console.log : false,
         define: {
           timestamps: true,
           underscored: true,
         },
+        dialectOptions: {
+          ssl: configService.get('DB_HOST') && configService.get('DB_HOST').includes('rds.amazonaws.com') ? {
+            require: true,
+            rejectUnauthorized: false
+          } : false
+        },
         pool: {
-          max: 10,
-          min: 0,
-          acquire: 30000,
+          max: 20,
+          min: 5,
+          acquire: 60000,
           idle: 10000,
         },
       }),
@@ -72,37 +80,8 @@ import { VendorModule } from './modules/vendor/vendor.module';
       inject: [ConfigService],
     }),
     
-    // Microservice clients
-    ClientsModule.registerAsync([
-      {
-        name: 'AUTH_SERVICE',
-        imports: [ConfigModule],
-        useFactory: (configService: ConfigService) => ({
-          transport: Transport.RMQ,
-          options: {
-            urls: [configService.get('RABBITMQ_URL', 'amqp://localhost:5672')],
-            queue: 'auth_queue',
-            queueOptions: { durable: true },
-            noAck: false,
-          },
-        }),
-        inject: [ConfigService],
-      },
-      {
-        name: 'BOOKING_SERVICE',
-        imports: [ConfigModule],
-        useFactory: (configService: ConfigService) => ({
-          transport: Transport.RMQ,
-          options: {
-            urls: [configService.get('RABBITMQ_URL', 'amqp://localhost:5672')],
-            queue: 'booking_queue',
-            queueOptions: { durable: true },
-            noAck: false,
-          },
-        }),
-        inject: [ConfigService],
-      },
-    ]),
+    // Redis for microservice communication
+    RedisModule,
     
     // Feature modules
     DatabaseModule,

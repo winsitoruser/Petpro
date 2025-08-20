@@ -107,6 +107,30 @@ export class Pet extends Model<Pet> {
   })
   microchipId: string;
 
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  microchipNumber: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  type: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  imageUrl: string;
+
+  @Column({
+    type: DataType.UUID,
+    allowNull: true,
+  })
+  ownerId: string;
+
   // Define relationship
   @BelongsTo(() => User)
   user: User;

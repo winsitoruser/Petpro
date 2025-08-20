@@ -265,7 +265,7 @@ export class ReviewService {
       }
       
       // Set up sort order
-      let order = [['createdAt', 'DESC']]; // Default sort by most recent
+      let order: any = [['createdAt', 'DESC']]; // Default sort by most recent
       
       if (sort === 'helpful') {
         order = [['helpfulCount', 'DESC'], ['createdAt', 'DESC']];
