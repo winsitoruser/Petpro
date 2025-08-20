@@ -12,4 +12,4 @@ import { SystemLog } from '../../models/system-log.model';
   providers: [DashboardService],
   exports: [DashboardService],
 })
-export class DashboardModule {}
+export class DashboardModule { }

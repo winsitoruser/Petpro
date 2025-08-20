@@ -13,7 +13,7 @@ export class AdminMicroserviceController {
   ) {}
 
   // Auth related endpoints
-  @MessagePattern({ cmd: 'admin_login' })
+  @MessagePattern('admin_login')
   async adminLogin(@Payload() loginDto: any) {
     try {
       return await this.authService.login(loginDto);
@@ -22,7 +22,7 @@ export class AdminMicroserviceController {
     }
   }
 
-  @MessagePattern({ cmd: 'admin_logout' })
+  @MessagePattern('admin_logout')
   async adminLogout(@Payload() data: { token: string }) {
     try {
       const userId = this.extractUserIdFromToken(data.token);
@@ -32,7 +32,7 @@ export class AdminMicroserviceController {
     }
   }
 
-  @MessagePattern({ cmd: 'admin_profile' })
+  @MessagePattern('admin_profile')
   async adminProfile(@Payload() data: { token: string }) {
     try {
       const userId = this.extractUserIdFromToken(data.token);
@@ -42,7 +42,7 @@ export class AdminMicroserviceController {
     }
   }
 
-  @MessagePattern({ cmd: 'create_admin' })
+  @MessagePattern('create_admin')
   async createAdmin(@Payload() data: { createAdminDto: any; token: string }) {
     try {
       return await this.authService.createAdmin(data.createAdminDto);
@@ -52,7 +52,7 @@ export class AdminMicroserviceController {
   }
 
   // User management endpoints
-  @MessagePattern({ cmd: 'get_admin_users' })
+  @MessagePattern('get_admin_users')
   async getAdminUsers(@Payload() data: { token: string; query: any }) {
     try {
       const { page, limit, search } = data.query;
@@ -62,7 +62,7 @@ export class AdminMicroserviceController {
     }
   }
 
-  @MessagePattern({ cmd: 'get_admin_user' })
+  @MessagePattern('get_admin_user')
   async getAdminUser(@Payload() data: { id: string; token: string }) {
     try {
       return await this.userService.findById(data.id);
@@ -71,7 +71,7 @@ export class AdminMicroserviceController {
     }
   }
 
-  @MessagePattern({ cmd: 'update_admin_user' })
+  @MessagePattern('update_admin_user')
   async updateAdminUser(@Payload() data: { id: string; data: any; token: string }) {
     try {
       const adminId = this.extractUserIdFromToken(data.token);
@@ -81,7 +81,7 @@ export class AdminMicroserviceController {
     }
   }
 
-  @MessagePattern({ cmd: 'deactivate_admin_user' })
+  @MessagePattern('deactivate_admin_user')
   async deactivateAdminUser(@Payload() data: { id: string; token: string }) {
     try {
       const adminId = this.extractUserIdFromToken(data.token);
@@ -91,7 +91,7 @@ export class AdminMicroserviceController {
     }
   }
 
-  @MessagePattern({ cmd: 'activate_admin_user' })
+  @MessagePattern('activate_admin_user')
   async activateAdminUser(@Payload() data: { id: string; token: string }) {
     try {
       const adminId = this.extractUserIdFromToken(data.token);
@@ -102,7 +102,7 @@ export class AdminMicroserviceController {
   }
 
   // Dashboard endpoints
-  @MessagePattern({ cmd: 'get_dashboard_stats' })
+  @MessagePattern('get_dashboard_stats')
   async getDashboardStats(@Payload() data: { token: string }) {
     try {
       return await this.dashboardService.getDashboardStats();
@@ -111,7 +111,7 @@ export class AdminMicroserviceController {
     }
   }
 
-  @MessagePattern({ cmd: 'get_recent_activity' })
+  @MessagePattern('get_recent_activity')
   async getRecentActivity(@Payload() data: { token: string; query: any }) {
     try {
       const { limit } = data.query;
@@ -121,7 +121,7 @@ export class AdminMicroserviceController {
     }
   }
 
-  @MessagePattern({ cmd: 'get_system_health' })
+  @MessagePattern('get_system_health')
   async getSystemHealth(@Payload() data: { token: string }) {
     try {
       return await this.dashboardService.getSystemHealth();
@@ -139,4 +139,4 @@ export class AdminMicroserviceController {
       throw new Error('Invalid token');
     }
   }
-}
+} 

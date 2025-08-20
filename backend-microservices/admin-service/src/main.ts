@@ -12,14 +12,14 @@ async function bootstrap() {
     const sequelize = app.get(Sequelize);
     await sequelize.authenticate();
     console.log('Database connection established successfully');
-    
+
     const { execSync } = require('child_process');
     const path = require('path');
-    
+
     // Run migrations
     const configPath = path.join(process.cwd(), 'sequelize.config.js');
     const migrationsPath = path.join(process.cwd(), 'src/database/migrations');
-    
+
     console.log('Running database migrations...');
     execSync(`npx sequelize-cli db:migrate --config ${configPath} --migrations-path ${migrationsPath}`, {
       stdio: 'inherit',
@@ -30,7 +30,7 @@ async function bootstrap() {
     console.error('Database migration failed:', error.message);
     process.exit(1);
   }
-  
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

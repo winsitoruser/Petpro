@@ -41,4 +41,4 @@ import { SystemLog } from '../../models/system-log.model';
     }),
   ],
 })
-export class DatabaseModule {}
+export class DatabaseModule { }
