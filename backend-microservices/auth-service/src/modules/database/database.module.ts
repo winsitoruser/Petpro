@@ -1,7 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Module, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { LoggerService } from '../../common/logger/logger.service';
+import { Sequelize } from 'sequelize-typescript';
+import * as path from 'path';
 
 @Module({
   imports: [
@@ -30,7 +32,7 @@ import { LoggerService } from '../../common/logger/logger.service';
           password,
           database,
           autoLoadModels: true,
-          synchronize: false, // Disable auto sync, use migrations only
+          synchronize: true, // Enable auto sync for automatic migration
           logging: (msg) => loggerService.debug(msg, 'Sequelize'),
           define: {
             timestamps: true,
