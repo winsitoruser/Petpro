@@ -1,0 +1,984 @@
+{
+  "info": {
+    "name": "PetPro Mobile & User API",
+    "description": "Mobile app and user API collection using Authorization header tokens",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "api_gateway_url",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "auth_service_url",
+      "value": "http://localhost:3001/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pet_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "User Registration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('access_token', response.accessToken);",
+                  "    pm.environment.set('refresh_token', response.refreshToken);",
+                  "    pm.environment.set('user_id', response.user.id);",
+                  "    pm.test('Registration successful', function() {",
+                  "        pm.expect(response).to.have.property('accessToken');",
+                  "        pm.expect(response).to.have.property('refreshToken');",
+                  "        pm.expect(response).to.have.property('user');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"UserPassword123!\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"customer\",\n  \"phoneNumber\": \"+1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_service_url}}/auth/register",
+              "host": ["{{auth_service_url}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"UserPassword123!\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"customer\",\n  \"phoneNumber\": \"+1234567890\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": \"user_123e4567-e89b-12d3-a456-426614174000\",\n    \"email\": \"customer@example.com\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"role\": \"customer\",\n    \"isEmailVerified\": false,\n    \"createdAt\": \"2025-01-21T10:30:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "User Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('access_token', response.accessToken);",
+                  "    pm.environment.set('refresh_token', response.refreshToken);",
+                  "    pm.environment.set('user_id', response.user.id);",
+                  "    pm.test('Login successful', function() {",
+                  "        pm.expect(response).to.have.property('accessToken');",
+                  "        pm.expect(response).to.have.property('refreshToken');",
+                  "        pm.expect(response).to.have.property('user');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"UserPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_service_url}}/auth/login",
+              "host": ["{{auth_service_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('access_token', response.accessToken);",
+                  "    if (response.refreshToken) {",
+                  "        pm.environment.set('refresh_token', response.refreshToken);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_service_url}}/auth/refresh-token",
+              "host": ["{{auth_service_url}}"],
+              "path": ["auth", "refresh-token"]
+            }
+          }
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_service_url}}/auth/me",
+              "host": ["{{auth_service_url}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_service_url}}/auth/logout",
+              "host": ["{{auth_service_url}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 User Profile",
+      "item": [
+        {
+          "name": "Get My Profile (Gateway)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{api_gateway_url}}/auth/profile",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John Updated\",\n  \"lastName\": \"Doe Updated\",\n  \"phoneNumber\": \"+1234567899\",\n  \"address\": {\n    \"street\": \"123 Main St\",\n    \"city\": \"Jakarta\",\n    \"state\": \"DKI Jakarta\",\n    \"country\": \"Indonesia\",\n    \"postalCode\": \"12345\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_gateway_url}}/auth/profile",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Request Password Reset",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_service_url}}/users/password-reset/request",
+              "host": ["{{auth_service_url}}"],
+              "path": ["users", "password-reset", "request"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🐕 Pet Management",
+      "item": [
+        {
+          "name": "Add New Pet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('pet_id', response.id);",
+                  "    pm.test('Pet created successfully', function() {",
+                  "        pm.expect(response).to.have.property('id');",
+                  "        pm.expect(response).to.have.property('name');",
+                  "        pm.expect(response).to.have.property('species');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Buddy\",\n  \"species\": \"Dog\",\n  \"breed\": \"Golden Retriever\",\n  \"birthDate\": \"2020-05-15\",\n  \"gender\": \"male\",\n  \"weight\": 25.5,\n  \"color\": \"Golden\",\n  \"photoUrl\": \"https://example.com/photos/buddy.jpg\",\n  \"microchipped\": true,\n  \"microchipNumber\": \"985112345678901\",\n  \"allergies\": \"None known\",\n  \"specialNeeds\": \"None\",\n  \"medicalConditions\": \"Healthy\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_service_url}}/pets",
+              "host": ["{{auth_service_url}}"],
+              "path": ["pets"]
+            }
+          }
+        },
+        {
+          "name": "Get My Pets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_service_url}}/pets",
+              "host": ["{{auth_service_url}}"],
+              "path": ["pets"]
+            }
+          }
+        },
+        {
+          "name": "Get Pet Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_service_url}}/pets/{{pet_id}}",
+              "host": ["{{auth_service_url}}"],
+              "path": ["pets", "{{pet_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Pet",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"weight\": 26.0,\n  \"specialNeeds\": \"Requires daily medication for arthritis\",\n  \"medicalConditions\": \"Mild arthritis in back legs\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_service_url}}/pets/{{pet_id}}",
+              "host": ["{{auth_service_url}}"],
+              "path": ["pets", "{{pet_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Pet",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_service_url}}/pets/{{pet_id}}",
+              "host": ["{{auth_service_url}}"],
+              "path": ["pets", "{{pet_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏥 Pet Health Records",
+      "item": [
+        {
+          "name": "Add Health Record",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"petId\": \"{{pet_id}}\",\n  \"recordType\": \"checkup\",\n  \"date\": \"2025-01-20\",\n  \"veterinarianName\": \"Dr. Sarah Johnson\",\n  \"clinicName\": \"Happy Pets Veterinary Clinic\",\n  \"diagnosis\": \"Healthy - routine checkup\",\n  \"treatment\": \"Annual vaccination, dental cleaning\",\n  \"medications\": [\"Rabies vaccine\", \"DHPP vaccine\"],\n  \"notes\": \"Pet is in excellent health. No concerns.\",\n  \"nextAppointment\": \"2026-01-20\",\n  \"cost\": 150.00\n}"
+            },
+            "url": {
+              "raw": "{{auth_service_url}}/pet-health/records",
+              "host": ["{{auth_service_url}}"],
+              "path": ["pet-health", "records"]
+            }
+          }
+        },
+        {
+          "name": "Get Pet Health Records",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_service_url}}/pet-health/records?petId={{pet_id}}",
+              "host": ["{{auth_service_url}}"],
+              "path": ["pet-health", "records"],
+              "query": [
+                {
+                  "key": "petId",
+                  "value": "{{pet_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Clinic Visit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"petId\": \"{{pet_id}}\",\n  \"visitDate\": \"2025-01-20T14:30:00.000Z\",\n  \"clinicName\": \"Happy Pets Veterinary Clinic\",\n  \"veterinarianName\": \"Dr. Sarah Johnson\",\n  \"reasonForVisit\": \"Routine checkup and vaccination\",\n  \"diagnosis\": \"Healthy\",\n  \"treatment\": \"Annual vaccination\",\n  \"prescriptions\": [],\n  \"cost\": 150.00,\n  \"followUpRequired\": false,\n  \"followUpDate\": null,\n  \"notes\": \"Annual checkup completed. All vital signs normal.\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_service_url}}/pet-health/visits",
+              "host": ["{{auth_service_url}}"],
+              "path": ["pet-health", "visits"]
+            }
+          }
+        },
+        {
+          "name": "Get Pet Clinic Visits",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_service_url}}/pet-health/visits?petId={{pet_id}}",
+              "host": ["{{auth_service_url}}"],
+              "path": ["pet-health", "visits"],
+              "query": [
+                {
+                  "key": "petId",
+                  "value": "{{pet_id}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📅 Bookings (Gateway)",
+      "item": [
+        {
+          "name": "Get Available Services",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_gateway_url}}/bookings/services?category=grooming&location=jakarta",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["bookings", "services"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "grooming"
+                },
+                {
+                  "key": "location",
+                  "value": "jakarta"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Service Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_gateway_url}}/bookings/services/{{service_id}}",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["bookings", "services", "{{service_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Check Availability",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_gateway_url}}/bookings/availability?serviceId={{service_id}}&date=2025-02-01&timeSlot=morning",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["bookings", "availability"],
+              "query": [
+                {
+                  "key": "serviceId",
+                  "value": "{{service_id}}"
+                },
+                {
+                  "key": "date",
+                  "value": "2025-02-01"
+                },
+                {
+                  "key": "timeSlot",
+                  "value": "morning"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('booking_id', response.id);",
+                  "    pm.test('Booking created successfully', function() {",
+                  "        pm.expect(response).to.have.property('id');",
+                  "        pm.expect(response).to.have.property('status');",
+                  "        pm.expect(response.status).to.equal('confirmed');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceId\": \"{{service_id}}\",\n  \"petId\": \"{{pet_id}}\",\n  \"appointmentDate\": \"2025-02-01T10:00:00.000Z\",\n  \"notes\": \"First time grooming for Buddy. Please be gentle as he might be nervous.\",\n  \"specialRequests\": \"Please use hypoallergenic shampoo\",\n  \"pickupAddress\": {\n    \"street\": \"123 Main St\",\n    \"city\": \"Jakarta\",\n    \"postalCode\": \"12345\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{api_gateway_url}}/bookings",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["bookings"]
+            }
+          }
+        },
+        {
+          "name": "Get My Bookings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{api_gateway_url}}/bookings?status=active&page=1&limit=20",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["bookings"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Booking Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{api_gateway_url}}/bookings/{{booking_id}}",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["bookings", "{{booking_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Booking",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appointmentDate\": \"2025-02-02T14:00:00.000Z\",\n  \"notes\": \"Updated appointment time due to schedule conflict\",\n  \"specialRequests\": \"Please use hypoallergenic shampoo and trim nails\"\n}"
+            },
+            "url": {
+              "raw": "{{api_gateway_url}}/bookings/{{booking_id}}",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["bookings", "{{booking_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{api_gateway_url}}/bookings/{{booking_id}}",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["bookings", "{{booking_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📦 Product Catalog",
+      "item": [
+        {
+          "name": "Browse Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_gateway_url}}/inventory/products?page=1&limit=20&category=food&minPrice=10&maxPrice=100",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["inventory", "products"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "category",
+                  "value": "food"
+                },
+                {
+                  "key": "minPrice",
+                  "value": "10"
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_gateway_url}}/inventory/products/search?query=premium dog food&limit=10",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["inventory", "products", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "premium dog food"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_gateway_url}}/inventory/products/{{product_id}}",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["inventory", "products", "{{product_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Product Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_gateway_url}}/inventory/categories",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["inventory", "categories"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 User Activities",
+      "item": [
+        {
+          "name": "Get My Activities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_service_url}}/activities?page=1&limit=50&type=booking",
+              "host": ["{{auth_service_url}}"],
+              "path": ["activities"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "type",
+                  "value": "booking"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{auth_service_url}}/analytics/dashboard?period=month",
+              "host": ["{{auth_service_url}}"],
+              "path": ["analytics", "dashboard"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "month"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔧 Health Checks",
+      "item": [
+        {
+          "name": "API Gateway Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_gateway_url}}/health",
+              "host": ["{{api_gateway_url}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Auth Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{auth_service_url}}/health",
+              "host": ["{{auth_service_url}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-refresh token if needed",
+          "const accessToken = pm.environment.get('access_token');",
+          "const refreshToken = pm.environment.get('refresh_token');",
+          "",
+          "// Skip refresh for login/register endpoints",
+          "const url = pm.request.url.toString();",
+          "if (url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/health')) {",
+          "    return;",
+          "}",
+          "",
+          "// If no access token but have refresh token, try to refresh",
+          "if (!accessToken && refreshToken) {",
+          "    pm.sendRequest({",
+          "        url: pm.environment.get('auth_service_url') + '/auth/refresh-token',",
+          "        method: 'POST',",
+          "        header: {",
+          "            'Content-Type': 'application/json'",
+          "        },",
+          "        body: {",
+          "            mode: 'raw',",
+          "            raw: JSON.stringify({ refreshToken: refreshToken })",
+          "        }",
+          "    }, function(err, response) {",
+          "        if (response && response.code === 200) {",
+          "            const responseJson = response.json();",
+          "            pm.environment.set('access_token', responseJson.accessToken);",
+          "            if (responseJson.refreshToken) {",
+          "                pm.environment.set('refresh_token', responseJson.refreshToken);",
+          "            }",
+          "        } else {",
+          "            // Clear invalid tokens",
+          "            pm.environment.unset('access_token');",
+          "            pm.environment.unset('refresh_token');",
+          "            pm.environment.unset('user_id');",
+          "        }",
+          "    });",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global response tests",
+          "pm.test('Response time is acceptable', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+          "});",
+          "",
+          "// Auto-refresh on 401 errors",
+          "if (pm.response.code === 401) {",
+          "    const refreshToken = pm.environment.get('refresh_token');",
+          "    if (refreshToken) {",
+          "        pm.test('Token expired - will retry with refresh', function() {",
+          "            pm.expect(refreshToken).to.not.be.empty;",
+          "        });",
+          "    } else {",
+          "        pm.test('Authentication required', function() {",
+          "            pm.expect(pm.response.code).to.equal(401);",
+          "        });",
+          "    }",
+          "}",
+          "",
+          "// Test for successful responses",
+          "if (pm.response.code >= 200 && pm.response.code < 300) {",
+          "    pm.test('Response is successful', function () {",
+          "        pm.response.to.be.success;",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ]
+}

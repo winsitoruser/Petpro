@@ -40,6 +40,15 @@ export class AuthService {
     return response.data;
   }
 
+  async refreshToken(refreshToken: string): Promise<any> {
+    const response: AxiosResponse = await firstValueFrom(
+      this.httpService.post(`${this.adminServiceUrl}/api/v1/auth/refresh-token`, {
+        refreshToken
+      })
+    );
+    return response.data;
+  }
+
   async createAdmin(createAdminDto: any, token: string): Promise<any> {
     const response: AxiosResponse = await firstValueFrom(
       this.httpService.post(`${this.adminServiceUrl}/api/v1/auth/create-admin`, createAdminDto, {
