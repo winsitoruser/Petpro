@@ -7,7 +7,7 @@ import { UserModule } from './modules/user/user.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { HealthModule } from './modules/health/health.module';
 import { AdminMicroserviceModule } from './modules/admin-microservice/admin-microservice.module';
-import { LoggerModule } from './common/logger/logger.module';
+import { LoggerModule } from './common/logger/logger.module'; 
 
 @Module({
   imports: [

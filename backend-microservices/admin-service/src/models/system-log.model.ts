@@ -4,6 +4,7 @@ import {
   Model,
   DataType,
   CreatedAt,
+  UpdatedAt,
   ForeignKey,
   BelongsTo,
 } from 'sequelize-typescript';
@@ -81,6 +82,9 @@ export class SystemLog extends Model<SystemLog> {
 
   @CreatedAt
   createdAt: Date;
+
+  @UpdatedAt
+  updatedAt: Date;
 
   @BelongsTo(() => AdminUser)
   user: AdminUser;

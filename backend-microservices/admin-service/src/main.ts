@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { Sequelize } from 'sequelize-typescript';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   // Create HTTP app
@@ -38,6 +39,17 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // Configure Swagger documentation
+  const config = new DocumentBuilder()
+    .setTitle('PetPro Vendor Service API')
+    .setDescription('The Vendor Service API documentation')
+    .setVersion('1.0')
+    .addTag('vendors')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
 
   // Redis service communication handled via RedisModule (if needed)
 
